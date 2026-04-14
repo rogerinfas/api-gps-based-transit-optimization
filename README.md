@@ -63,3 +63,18 @@ Proyecto en desarrollo con fines académicos (tesis), enfocado en la validación
 
 Variables actuales:
 - `PORT`: puerto donde levanta la API (por defecto `3000`).
+- `DB_HOST`: host de base de datos (local: `localhost`).
+- `DB_PORT`: puerto de base de datos (local: `5432`).
+- `DB_NAME`: nombre de la base de datos.
+- `DB_USER`: usuario de base de datos.
+- `DB_PASSWORD`: contraseña de base de datos.
+
+## 🐳 Docker Compose (PostgreSQL + PostGIS)
+El proyecto incluye `docker-compose.yml` para levantar la base de datos geoespacial.
+
+Comandos:
+- Levantar en segundo plano: `docker compose up -d`
+- Ver estado: `docker compose ps`
+- Ver logs: `docker compose logs -f postgres`
+- Detener: `docker compose down`
+- Detener y borrar volumen de datos: `docker compose down -v`
