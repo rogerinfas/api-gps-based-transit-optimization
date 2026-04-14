@@ -62,7 +62,7 @@ Proyecto en desarrollo con fines académicos (tesis), enfocado en la validación
 2. Configura las variables según tu entorno local.
 
 Variables actuales:
-- `PORT`: puerto donde levanta la API (por defecto `3000`).
+- `PORT`: puerto donde levanta la API (por defecto `4000`).
 - `DB_HOST`: host de base de datos (local: `localhost`).
 - `DB_PORT`: puerto de base de datos (local: `5432`).
 - `DB_NAME`: nombre de la base de datos.
@@ -78,3 +78,21 @@ Comandos:
 - Ver logs: `docker compose logs -f postgres`
 - Detener: `docker compose down`
 - Detener y borrar volumen de datos: `docker compose down -v`
+
+Nota:
+- La extensión `postgis` se habilita automáticamente en una base nueva mediante `docker/postgres/init/01-enable-postgis.sql`.
+
+## 🧱 Prisma
+Prisma está configurado con PostgreSQL y modelos base del dominio:
+- `Route`
+- `Stop`
+- `RouteStop`
+- `Vehicle`
+- `GpsPosition`
+- `EtaPrediction`
+
+Comandos útiles:
+- Generar cliente: `pnpm prisma:generate`
+- Migración en desarrollo: `pnpm prisma:migrate:dev`
+- Aplicar migraciones en despliegue: `pnpm prisma:migrate:deploy`
+- Abrir Prisma Studio: `pnpm prisma:studio`
