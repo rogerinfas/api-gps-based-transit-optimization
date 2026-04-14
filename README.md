@@ -55,3 +55,11 @@ Proporcionar una base sólida y escalable para la implementación de soluciones 
 
 ## 📌 Estado del Proyecto
 Proyecto en desarrollo con fines académicos (tesis), enfocado en la validación de un modelo de optimización de tiempos en transporte público.
+
+## 🔐 Variables de entorno
+1. Copia el archivo de ejemplo:
+   - `cp .env.example .env`
+2. Configura las variables según tu entorno local.
+
+Variables actuales:
+- `PORT`: puerto donde levanta la API (por defecto `3000`).
