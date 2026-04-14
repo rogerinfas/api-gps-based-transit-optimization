@@ -96,3 +96,21 @@ Comandos útiles:
 - Migración en desarrollo: `pnpm prisma:migrate:dev`
 - Aplicar migraciones en despliegue: `pnpm prisma:migrate:deploy`
 - Abrir Prisma Studio: `pnpm prisma:studio`
+
+## 🚀 CI/CD
+- Rama de integración: `develop`.
+- Rama de producción: `main`/`master`.
+- CI corre en PR/push a `develop`, `main`, `master`.
+- CD despliega automáticamente al hacer merge/push a `main` o `master`.
+
+Secrets requeridos en GitHub Actions:
+- `VPS_HOST`
+- `VPS_USER`
+- `VPS_PORT`
+- `VPS_SSH_KEY`
+- `BACKEND_APP_PATH`
+- `BACKEND_PORT` (recomendado `4000`)
+- `POSTGRES_PORT` (recomendado `5432`)
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
