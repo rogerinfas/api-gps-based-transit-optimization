@@ -70,14 +70,14 @@ Variables actuales:
 - `DB_PASSWORD`: contraseña de base de datos.
 
 ## 🐳 Docker Compose (PostgreSQL + PostGIS)
-El proyecto incluye `docker-compose.yml` para levantar la base de datos geoespacial.
+El proyecto incluye `docker/docker-compose.yml` para levantar la base de datos geoespacial.
 
 Comandos:
-- Levantar en segundo plano: `docker compose up -d`
-- Ver estado: `docker compose ps`
-- Ver logs: `docker compose logs -f postgres`
-- Detener: `docker compose down`
-- Detener y borrar volumen de datos: `docker compose down -v`
+- Levantar en segundo plano: `docker compose -f docker/docker-compose.yml up -d`
+- Ver estado: `docker compose -f docker/docker-compose.yml ps`
+- Ver logs: `docker compose -f docker/docker-compose.yml logs -f postgres`
+- Detener: `docker compose -f docker/docker-compose.yml down`
+- Detener y borrar volumen de datos: `docker compose -f docker/docker-compose.yml down -v`
 
 Nota:
 - La extensión `postgis` se habilita automáticamente en una base nueva mediante `docker/postgres/init/01-enable-postgis.sql`.
