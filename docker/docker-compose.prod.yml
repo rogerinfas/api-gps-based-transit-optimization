@@ -33,7 +33,7 @@ services:
         condition: service_healthy
     ports:
       - "${PORT:-4000}:4000"
-    command: sh -c "pnpm prisma migrate deploy && node dist/main"
+    command: sh -c "pnpm prisma migrate deploy && node dist/src/main"
 
 volumes:
   postgres_data:
