@@ -52,6 +52,6 @@ jobs:
             DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
             EOF
 
-            docker compose -f docker-compose.prod.yml up -d postgres
-            docker compose -f docker-compose.prod.yml run --rm api pnpm prisma migrate deploy
-            docker compose -f docker-compose.prod.yml up -d --build api
+            docker compose -f docker/docker-compose.prod.yml up -d postgres
+            docker compose -f docker/docker-compose.prod.yml run --rm api pnpm prisma migrate deploy
+            docker compose -f docker/docker-compose.prod.yml up -d --build api
