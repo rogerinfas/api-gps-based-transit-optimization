@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgis/postgis:16-3.4
-    container_name: transit-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -22,7 +21,6 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: transit-api
     restart: unless-stopped
     env_file:
       - ../.env
