@@ -18,6 +18,7 @@ RUN pnpm prune --prod --ignore-scripts
 FROM base AS runner
 ENV NODE_ENV=production
 WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
