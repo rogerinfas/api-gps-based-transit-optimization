@@ -26,6 +26,7 @@ jobs:
           key: ${{ secrets.VPS_KEY }}
           port: ${{ secrets.VPS_PORT }}
           envs: APP_PATH,REPO_URL,BRANCH_NAME,PORT,POSTGRES_PORT,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD
+          command_timeout: 30m
           script: |
             set -e
 
