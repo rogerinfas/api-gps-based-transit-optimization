@@ -53,6 +53,10 @@ jobs:
             DATABASE_URL='postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public'
             EOF
 
+            # Limpiar contenedores antiguos del proyecto por defecto para liberar puertos
+            docker stop transit-api transit-postgres || true
+            docker rm transit-api transit-postgres || true
+
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d postgres
             docker compose -p transit-backend -f docker/docker-compose.prod.yml run --rm api pnpm prisma migrate deploy
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d --build api
