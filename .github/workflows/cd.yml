@@ -58,5 +58,5 @@ jobs:
             docker rm transit-api transit-postgres || true
 
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d postgres
-            docker compose -p transit-backend -f docker/docker-compose.prod.yml run --rm api pnpm prisma migrate deploy
+            docker compose -p transit-backend -f docker/docker-compose.prod.yml run --rm api pnpm prisma:migrate:deploy
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d --build api
