@@ -18,9 +18,7 @@ services:
       retries: 5
 
   api:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ${API_IMAGE:-rderoger/api-gps-based-transit-optimization:${IMAGE_TAG:-latest}}
     restart: unless-stopped
     env_file:
       - ../.env
