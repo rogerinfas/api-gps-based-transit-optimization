@@ -4,6 +4,9 @@ on:
   push:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 jobs:
   preflight:
     runs-on: ubuntu-latest
@@ -20,10 +23,36 @@ jobs:
           test -n "${{ secrets.POSTGRES_DB }}"
           test -n "${{ secrets.POSTGRES_USER }}"
           test -n "${{ secrets.POSTGRES_PASSWORD }}"
+          test -n "${{ secrets.REGISTRY_USERNAME }}"
+          test -n "${{ secrets.REGISTRY_TOKEN }}"
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    needs: preflight
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            rderoger/api-gps-based-transit-optimization:${{ github.sha }}
+            rderoger/api-gps-based-transit-optimization:latest
 
   deploy:
     runs-on: ubuntu-latest
-    needs: preflight
+    needs: build_and_push
 
     steps:
       - name: Deploy on VPS
@@ -32,6 +61,10 @@ jobs:
           APP_PATH: ${{ secrets.BACKEND_APP_PATH }}
           REPO_URL: git@github.com:rogerinfas/api-gps-based-transit-optimization.git
           BRANCH_NAME: ${{ github.ref_name }}
+          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_REPO: rderoger/api-gps-based-transit-optimization
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
           PORT: "4000"
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
@@ -42,7 +75,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          envs: APP_PATH,REPO_URL,BRANCH_NAME,PORT,POSTGRES_PORT,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD
+          envs: APP_PATH,REPO_URL,BRANCH_NAME,IMAGE_TAG,IMAGE_REPO,REGISTRY_USERNAME,REGISTRY_TOKEN,PORT,POSTGRES_PORT,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD
           command_timeout: 30m
           script: |
             set -e
@@ -68,12 +101,16 @@ jobs:
             POSTGRES_USER='${POSTGRES_USER}'
             POSTGRES_PASSWORD='${POSTGRES_PASSWORD}'
             DATABASE_URL='postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public'
+            IMAGE_TAG='${IMAGE_TAG}'
+            API_IMAGE='${IMAGE_REPO}:${IMAGE_TAG}'
             EOF
 
             # Limpiar contenedores antiguos del proyecto por defecto para liberar puertos
             docker stop transit-api transit-postgres || true
             docker rm transit-api transit-postgres || true
 
+            echo "${REGISTRY_TOKEN}" | docker login -u "${REGISTRY_USERNAME}" --password-stdin
+            docker compose -p transit-backend -f docker/docker-compose.prod.yml pull api
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d postgres
             docker compose -p transit-backend -f docker/docker-compose.prod.yml run --rm api pnpm prisma:migrate:deploy
-            docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d --build api
+            docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d api
