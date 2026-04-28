@@ -1,12 +1,20 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { VehicleService } from './vehicle.service';
+import { CreateVehicleUseCase } from './use-cases/create-vehicle.use-case';
+import { DeleteVehicleUseCase } from './use-cases/delete-vehicle.use-case';
+import { FindAllVehiclesUseCase } from './use-cases/find-all-vehicles.use-case';
+import { FindVehicleByIdUseCase } from './use-cases/find-vehicle-by-id.use-case';
+import { UpdateVehicleUseCase } from './use-cases/update-vehicle.use-case';
 import { VEHICLE_REPOSITORY } from '../domain/vehicle.repository';
 import type { IVehicleRepository } from '../domain/vehicle.repository';
 import { Vehicle } from '../domain/vehicle.entity';
 
-describe('VehicleService (application)', () => {
-  let service: VehicleService;
+describe('Vehicle use cases (application)', () => {
+  let createUseCase: CreateVehicleUseCase;
+  let findAllUseCase: FindAllVehiclesUseCase;
+  let findByIdUseCase: FindVehicleByIdUseCase;
+  let updateUseCase: UpdateVehicleUseCase;
+  let deleteUseCase: DeleteVehicleUseCase;
   let repository: jest.Mocked<IVehicleRepository>;
 
   const sampleVehicle = Vehicle.rehydrate({
@@ -31,18 +39,26 @@ describe('VehicleService (application)', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        VehicleService,
+        CreateVehicleUseCase,
+        FindAllVehiclesUseCase,
+        FindVehicleByIdUseCase,
+        UpdateVehicleUseCase,
+        DeleteVehicleUseCase,
         { provide: VEHICLE_REPOSITORY, useValue: repository },
       ],
     }).compile();
 
-    service = module.get(VehicleService);
+    createUseCase = module.get(CreateVehicleUseCase);
+    findAllUseCase = module.get(FindAllVehiclesUseCase);
+    findByIdUseCase = module.get(FindVehicleByIdUseCase);
+    updateUseCase = module.get(UpdateVehicleUseCase);
+    deleteUseCase = module.get(DeleteVehicleUseCase);
   });
 
   it('create delega al repositorio', async () => {
     repository.create.mockResolvedValue(sampleVehicle);
 
-    const result = await service.create({
+    const result = await createUseCase.execute({
       code: 'L-1',
       status: 'ACTIVE',
       plateNumber: null,
@@ -60,10 +76,19 @@ describe('VehicleService (application)', () => {
     expect(result).toBe(sampleVehicle);
   });
 
+  it('findAll delega al repositorio', async () => {
+    repository.findAll.mockResolvedValue([sampleVehicle]);
+
+    const result = await findAllUseCase.execute();
+
+    expect(repository.findAll).toHaveBeenCalled();
+    expect(result).toEqual([sampleVehicle]);
+  });
+
   it('findOne lanza NotFoundException si no existe', async () => {
     repository.findById.mockResolvedValue(null);
 
-    await expect(service.findOne('missing')).rejects.toBeInstanceOf(
+    await expect(findByIdUseCase.execute('missing')).rejects.toBeInstanceOf(
       NotFoundException,
     );
   });
@@ -71,7 +96,7 @@ describe('VehicleService (application)', () => {
   it('findOne devuelve el vehículo si existe', async () => {
     repository.findById.mockResolvedValue(sampleVehicle);
 
-    const result = await service.findOne('v1');
+    const result = await findByIdUseCase.execute('v1');
 
     expect(result).toBe(sampleVehicle);
   });
@@ -79,7 +104,7 @@ describe('VehicleService (application)', () => {
   it('update delega al repositorio', async () => {
     repository.update.mockResolvedValue(sampleVehicle);
 
-    await service.update('v1', { code: 'L-9' });
+    await updateUseCase.execute('v1', { code: 'L-9' });
 
     expect(repository.update).toHaveBeenCalledWith('v1', { code: 'L-9' });
   });
@@ -87,7 +112,7 @@ describe('VehicleService (application)', () => {
   it('remove delega al repositorio', async () => {
     repository.delete.mockResolvedValue(undefined);
 
-    await service.remove('v1');
+    await deleteUseCase.execute('v1');
 
     expect(repository.delete).toHaveBeenCalledWith('v1');
   });
