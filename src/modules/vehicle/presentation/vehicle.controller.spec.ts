@@ -1,11 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { VehicleController } from './vehicle.controller';
-import { VehicleService } from '../application/vehicle.service';
+import { CreateVehicleUseCase } from '../application/use-cases/create-vehicle.use-case';
+import { DeleteVehicleUseCase } from '../application/use-cases/delete-vehicle.use-case';
+import { FindAllVehiclesUseCase } from '../application/use-cases/find-all-vehicles.use-case';
+import { FindVehicleByIdUseCase } from '../application/use-cases/find-vehicle-by-id.use-case';
+import { UpdateVehicleUseCase } from '../application/use-cases/update-vehicle.use-case';
 import { Vehicle } from '../domain/vehicle.entity';
 
 describe('VehicleController (presentation)', () => {
   let controller: VehicleController;
-  let service: jest.Mocked<VehicleService>;
+  let createVehicleUseCase: { execute: jest.Mock };
+  let findAllVehiclesUseCase: { execute: jest.Mock };
+  let findVehicleByIdUseCase: { execute: jest.Mock };
+  let updateVehicleUseCase: { execute: jest.Mock };
+  let deleteVehicleUseCase: { execute: jest.Mock };
 
   const vehicle = Vehicle.rehydrate({
     id: 'v1',
@@ -19,29 +27,33 @@ describe('VehicleController (presentation)', () => {
   });
 
   beforeEach(async () => {
-    service = {
-      create: jest.fn(),
-      findAll: jest.fn(),
-      findOne: jest.fn(),
-      update: jest.fn(),
-      remove: jest.fn(),
-    } as unknown as jest.Mocked<VehicleService>;
+    createVehicleUseCase = { execute: jest.fn() };
+    findAllVehiclesUseCase = { execute: jest.fn() };
+    findVehicleByIdUseCase = { execute: jest.fn() };
+    updateVehicleUseCase = { execute: jest.fn() };
+    deleteVehicleUseCase = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [VehicleController],
-      providers: [{ provide: VehicleService, useValue: service }],
+      providers: [
+        { provide: CreateVehicleUseCase, useValue: createVehicleUseCase },
+        { provide: FindAllVehiclesUseCase, useValue: findAllVehiclesUseCase },
+        { provide: FindVehicleByIdUseCase, useValue: findVehicleByIdUseCase },
+        { provide: UpdateVehicleUseCase, useValue: updateVehicleUseCase },
+        { provide: DeleteVehicleUseCase, useValue: deleteVehicleUseCase },
+      ],
     }).compile();
 
     controller = module.get(VehicleController);
   });
 
   it('POST delega a servicio con datos mapeados', async () => {
-    service.create.mockResolvedValue(vehicle);
+    createVehicleUseCase.execute.mockResolvedValue(vehicle);
 
     const dto = { code: 'L-1' };
     const result = await controller.create(dto as never);
 
-    expect(service.create).toHaveBeenCalledWith({
+    expect(createVehicleUseCase.execute).toHaveBeenCalledWith({
       code: 'L-1',
       plateNumber: null,
       status: 'ACTIVE',
@@ -53,7 +65,7 @@ describe('VehicleController (presentation)', () => {
   });
 
   it('GET lista serializa fechas a ISO', async () => {
-    service.findAll.mockResolvedValue([vehicle]);
+    findAllVehiclesUseCase.execute.mockResolvedValue([vehicle]);
 
     const list = await controller.findAll();
 
