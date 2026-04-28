@@ -9,7 +9,11 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { VehicleService } from '../application/vehicle.service';
+import { CreateVehicleUseCase } from '../application/use-cases/create-vehicle.use-case';
+import { DeleteVehicleUseCase } from '../application/use-cases/delete-vehicle.use-case';
+import { FindAllVehiclesUseCase } from '../application/use-cases/find-all-vehicles.use-case';
+import { FindVehicleByIdUseCase } from '../application/use-cases/find-vehicle-by-id.use-case';
+import { UpdateVehicleUseCase } from '../application/use-cases/update-vehicle.use-case';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleResponseDto } from './dto/vehicle-response.dto';
@@ -17,13 +21,19 @@ import { VehicleStatuses } from '../domain/vehicle-status';
 
 @Controller('vehicles')
 export class VehicleController {
-  constructor(private readonly vehicleService: VehicleService) {}
+  constructor(
+    private readonly createVehicleUseCase: CreateVehicleUseCase,
+    private readonly findAllVehiclesUseCase: FindAllVehiclesUseCase,
+    private readonly findVehicleByIdUseCase: FindVehicleByIdUseCase,
+    private readonly updateVehicleUseCase: UpdateVehicleUseCase,
+    private readonly deleteVehicleUseCase: DeleteVehicleUseCase,
+  ) {}
 
   @Post()
   async create(
     @Body() createVehicleDto: CreateVehicleDto,
   ): Promise<VehicleResponseDto> {
-    const vehicle = await this.vehicleService.create({
+    const vehicle = await this.createVehicleUseCase.execute({
       code: createVehicleDto.code,
       plateNumber: createVehicleDto.plateNumber ?? null,
       status: createVehicleDto.status ?? VehicleStatuses[0],
@@ -35,13 +45,13 @@ export class VehicleController {
 
   @Get()
   async findAll(): Promise<VehicleResponseDto[]> {
-    const list = await this.vehicleService.findAll();
+    const list = await this.findAllVehiclesUseCase.execute();
     return list.map((v) => VehicleResponseDto.fromDomain(v));
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<VehicleResponseDto> {
-    const vehicle = await this.vehicleService.findOne(id);
+    const vehicle = await this.findVehicleByIdUseCase.execute(id);
     return VehicleResponseDto.fromDomain(vehicle);
   }
 
@@ -50,7 +60,7 @@ export class VehicleController {
     @Param('id') id: string,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ): Promise<VehicleResponseDto> {
-    const vehicle = await this.vehicleService.update(id, {
+    const vehicle = await this.updateVehicleUseCase.execute(id, {
       ...(updateVehicleDto.code !== undefined && {
         code: updateVehicleDto.code,
       }),
@@ -73,6 +83,6 @@ export class VehicleController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
-    await this.vehicleService.remove(id);
+    await this.deleteVehicleUseCase.execute(id);
   }
 }
