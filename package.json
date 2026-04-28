@@ -21,6 +21,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "./node_modules/.bin/prisma migrate deploy",
+    "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:studio": "prisma studio",
     "prepare": "husky"
   },
