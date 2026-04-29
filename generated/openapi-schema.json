@@ -1,0 +1,615 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/vehicles": {
+      "post": {
+        "operationId": "VehicleController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El código o la placa ya existen"
+          }
+        },
+        "summary": "Crear un vehículo (bus)",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "get": {
+        "operationId": "VehicleController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VehicleResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos los vehículos",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/vehicles/{id}": {
+      "get": {
+        "operationId": "VehicleController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador del vehículo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vehículo no encontrado"
+          }
+        },
+        "summary": "Obtener un vehículo por id",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "patch": {
+        "operationId": "VehicleController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador del vehículo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vehículo no encontrado"
+          },
+          "409": {
+            "description": "El código o la placa ya existen"
+          }
+        },
+        "summary": "Actualizar parcialmente un vehículo",
+        "tags": [
+          "Vehicles"
+        ]
+      },
+      "delete": {
+        "operationId": "VehicleController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador del vehículo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Vehículo eliminado"
+          },
+          "404": {
+            "description": "Vehículo no encontrado"
+          }
+        },
+        "summary": "Eliminar un vehículo",
+        "tags": [
+          "Vehicles"
+        ]
+      }
+    },
+    "/routes": {
+      "post": {
+        "operationId": "RouteController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRouteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El código de ruta ya existe"
+          }
+        },
+        "summary": "Crear una ruta",
+        "tags": [
+          "Routes"
+        ]
+      },
+      "get": {
+        "operationId": "RouteController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RouteResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas las rutas",
+        "tags": [
+          "Routes"
+        ]
+      }
+    },
+    "/routes/{id}": {
+      "get": {
+        "operationId": "RouteController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada"
+          }
+        },
+        "summary": "Obtener una ruta por id",
+        "tags": [
+          "Routes"
+        ]
+      },
+      "patch": {
+        "operationId": "RouteController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRouteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada"
+          },
+          "409": {
+            "description": "El código de ruta ya existe"
+          }
+        },
+        "summary": "Actualizar parcialmente una ruta",
+        "tags": [
+          "Routes"
+        ]
+      },
+      "delete": {
+        "operationId": "RouteController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Ruta eliminada"
+          },
+          "404": {
+            "description": "Ruta no encontrada"
+          }
+        },
+        "summary": "Eliminar una ruta",
+        "tags": [
+          "Routes"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "GPS Transit Optimization API",
+    "description": "Backend API documentation",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "CreateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Identificador interno del bus",
+            "example": "BUS-AQP-001",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "plateNumber": {
+            "type": "object",
+            "description": "Placa peruana asignada al vehículo",
+            "example": "ABC-123",
+            "maxLength": 32,
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Estado operativo del bus",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "MAINTENANCE"
+            ],
+            "example": "ACTIVE"
+          },
+          "capacity": {
+            "type": "object",
+            "description": "Capacidad de pasajeros",
+            "example": 80,
+            "minimum": 1,
+            "nullable": true
+          },
+          "routeId": {
+            "type": "object",
+            "description": "Identificador de la ruta asignada",
+            "example": "ckxyz123",
+            "maxLength": 64,
+            "nullable": true
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "VehicleResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único del vehículo",
+            "example": "ckxyz123"
+          },
+          "code": {
+            "type": "string",
+            "description": "Identificador interno del bus",
+            "example": "BUS-AQP-001"
+          },
+          "plateNumber": {
+            "type": "object",
+            "description": "Placa peruana del vehículo",
+            "example": "ABC-123",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Estado operativo del vehículo",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "MAINTENANCE"
+            ],
+            "example": "ACTIVE"
+          },
+          "capacity": {
+            "type": "object",
+            "description": "Capacidad de pasajeros",
+            "example": 80,
+            "nullable": true
+          },
+          "routeId": {
+            "type": "object",
+            "description": "Identificador de la ruta asignada",
+            "example": "ckxyz789",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Fecha de creación en formato ISO 8601",
+            "example": "2026-04-28T15:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Fecha de última actualización en formato ISO 8601",
+            "example": "2026-04-28T15:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "plateNumber",
+          "status",
+          "capacity",
+          "routeId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Identificador interno del bus",
+            "example": "BUS-AQP-001",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "plateNumber": {
+            "type": "object",
+            "description": "Placa peruana asignada al vehículo",
+            "example": "ABC-123",
+            "maxLength": 32,
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "Estado operativo del bus",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "MAINTENANCE"
+            ],
+            "example": "ACTIVE"
+          },
+          "capacity": {
+            "type": "object",
+            "description": "Capacidad de pasajeros",
+            "example": 80,
+            "minimum": 1,
+            "nullable": true
+          },
+          "routeId": {
+            "type": "object",
+            "description": "Identificador de la ruta asignada",
+            "example": "ckxyz123",
+            "maxLength": 64,
+            "nullable": true
+          }
+        }
+      },
+      "CreateRouteDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código único de la ruta",
+            "example": "AQP-CHAR-LA",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre comercial visible de la ruta",
+            "example": "CHARACATO L A",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "object",
+            "description": "Descripción opcional para operaciones",
+            "example": "Ruta urbana Characato - Linea A",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Indica si la ruta está operativa",
+            "example": true
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "RouteResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único de la ruta",
+            "example": "ckxyz789"
+          },
+          "code": {
+            "type": "string",
+            "description": "Código único de la ruta",
+            "example": "AQP-CHAR-LA"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre comercial visible de la ruta",
+            "example": "CHARACATO L A"
+          },
+          "description": {
+            "type": "object",
+            "description": "Descripción de la ruta",
+            "example": "Ruta urbana Characato - Linea A",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Indica si la ruta está operativa",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Fecha de creación en ISO 8601",
+            "example": "2026-04-28T15:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Fecha de última actualización en ISO 8601",
+            "example": "2026-04-28T15:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "description",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateRouteDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código único de la ruta",
+            "example": "AQP-CHAR-LA",
+            "minLength": 1,
+            "maxLength": 32
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre comercial visible de la ruta",
+            "example": "CHARACATO L A",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "object",
+            "description": "Descripción opcional para operaciones",
+            "example": "Ruta urbana Characato - Linea A",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Indica si la ruta está operativa",
+            "example": true
+          }
+        }
+      }
+    }
+  }
+}
