@@ -23,6 +23,7 @@
     "prisma:migrate:deploy": "./node_modules/.bin/prisma migrate deploy",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:studio": "prisma studio",
+    "generate:openapi": "ts-node scripts/generate-openapi.ts",
     "prepare": "husky"
   },
   "dependencies": {
