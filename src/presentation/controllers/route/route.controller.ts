@@ -113,8 +113,15 @@ export class RouteController {
   @Get(':id/simulate')
   @ApiOperation({ summary: 'Obtener un punto interpolado para simulación' })
   @ApiParam({ name: 'id', description: 'Identificador de la ruta' })
-  @ApiQuery({ name: 'progress', description: 'Progreso de la ruta (0.0 a 1.0)', example: 0.5 })
-  @ApiOkResponse({ description: 'Punto interpolado [lon, lat]', type: [Number] })
+  @ApiQuery({
+    name: 'progress',
+    description: 'Progreso de la ruta (0.0 a 1.0)',
+    example: 0.5,
+  })
+  @ApiOkResponse({
+    description: 'Punto interpolado [lon, lat]',
+    type: [Number],
+  })
   async simulate(
     @Param('id') id: string,
     @Query('progress') progress: string,

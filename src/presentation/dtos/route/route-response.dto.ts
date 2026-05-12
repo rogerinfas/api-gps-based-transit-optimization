@@ -46,7 +46,8 @@ export class RouteResponseDto {
   updatedAt!: string;
 
   @ApiProperty({
-    description: 'Geometría de la ruta en formato de coordenadas [[lon, lat], ...]',
+    description:
+      'Geometría de la ruta en formato de coordenadas [[lon, lat], ...]',
     example: [
       [-71.4883, -16.4716],
       [-71.531, -16.406],

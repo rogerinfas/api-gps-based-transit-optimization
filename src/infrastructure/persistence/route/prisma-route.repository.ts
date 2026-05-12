@@ -44,7 +44,6 @@ export class PrismaRouteRepository implements IRouteRepository {
   }
 
   async findAll(): Promise<Route[]> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const rows: RouteRow[] = await this.prisma.$queryRaw`
       SELECT id, code, name, description, "isActive", "createdAt", "updatedAt",
              ST_AsGeoJSON(path) as path
@@ -55,7 +54,6 @@ export class PrismaRouteRepository implements IRouteRepository {
   }
 
   async findById(id: string): Promise<Route | null> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const rows: RouteRow[] = await this.prisma.$queryRaw`
       SELECT id, code, name, description, "isActive", "createdAt", "updatedAt",
              ST_AsGeoJSON(path) as path
@@ -108,7 +106,6 @@ export class PrismaRouteRepository implements IRouteRepository {
     id: string,
     progress: number,
   ): Promise<[number, number] | null> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const rows: Array<{ point: string }> = await this.prisma.$queryRaw`
       SELECT ST_AsGeoJSON(ST_LineInterpolatePoint(path, ${progress})) as point
       FROM "Route"
@@ -119,7 +116,6 @@ export class PrismaRouteRepository implements IRouteRepository {
     if (!row?.point) return null;
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const geojson = JSON.parse(row.point) as {
         type: string;
         coordinates: [number, number];
