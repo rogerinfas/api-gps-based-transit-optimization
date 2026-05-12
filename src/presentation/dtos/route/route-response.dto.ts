@@ -45,6 +45,19 @@ export class RouteResponseDto {
   })
   updatedAt!: string;
 
+  @ApiProperty({
+    description:
+      'Geometría de la ruta en formato de coordenadas [[lon, lat], ...]',
+    example: [
+      [-71.4883, -16.4716],
+      [-71.531, -16.406],
+    ],
+    type: 'array',
+    items: { type: 'array', items: { type: 'number' } },
+    required: false,
+  })
+  path?: [number, number][];
+
   static fromDomain(route: Route): RouteResponseDto {
     const dto = new RouteResponseDto();
     dto.id = route.id;
@@ -54,6 +67,7 @@ export class RouteResponseDto {
     dto.isActive = route.isActive;
     dto.createdAt = route.createdAt.toISOString();
     dto.updatedAt = route.updatedAt.toISOString();
+    dto.path = route.path;
     return dto;
   }
 }

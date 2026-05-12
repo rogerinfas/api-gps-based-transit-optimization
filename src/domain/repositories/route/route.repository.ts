@@ -22,4 +22,8 @@ export interface IRouteRepository {
   findById(id: string): Promise<Route | null>;
   update(id: string, data: UpdateRouteData): Promise<Route>;
   delete(id: string): Promise<void>;
+  getInterpolatedPoint(
+    id: string,
+    progress: number,
+  ): Promise<[number, number] | null>;
 }

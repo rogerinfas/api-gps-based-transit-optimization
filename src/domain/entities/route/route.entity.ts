@@ -6,6 +6,7 @@ export interface RouteProps {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  path?: [number, number][];
 }
 
 export class Route {
@@ -41,6 +42,10 @@ export class Route {
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  get path(): [number, number][] | undefined {
+    return this.props.path;
   }
 
   toProps(): RouteProps {
