@@ -10,7 +10,10 @@ import type {
   UpdateRouteData,
 } from '@repositories/route/route.repository';
 import { Route } from '@entities/route/route.entity';
-import { PrismaRouteMapper } from '@persistence/route/prisma-route.mapper';
+import {
+  PrismaRouteMapper,
+  RouteRow,
+} from '@persistence/route/prisma-route.mapper';
 
 const uniqueViolation = 'P2002';
 const recordNotFound = 'P2025';
@@ -41,14 +44,25 @@ export class PrismaRouteRepository implements IRouteRepository {
   }
 
   async findAll(): Promise<Route[]> {
-    const rows = await this.prisma.route.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const rows: RouteRow[] = await this.prisma.$queryRaw`
+      SELECT id, code, name, description, "isActive", "createdAt", "updatedAt",
+             ST_AsGeoJSON(path) as path
+      FROM "Route"
+      ORDER BY "createdAt" DESC
+    `;
     return rows.map((row) => PrismaRouteMapper.toDomain(row));
   }
 
   async findById(id: string): Promise<Route | null> {
-    const row = await this.prisma.route.findUnique({ where: { id } });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const rows: RouteRow[] = await this.prisma.$queryRaw`
+      SELECT id, code, name, description, "isActive", "createdAt", "updatedAt",
+             ST_AsGeoJSON(path) as path
+      FROM "Route"
+      WHERE id = ${id}
+    `;
+    const row = rows[0];
     return row ? PrismaRouteMapper.toDomain(row) : null;
   }
 
@@ -87,6 +101,32 @@ export class PrismaRouteRepository implements IRouteRepository {
         throw new NotFoundException(`Ruta con id ${id} no encontrada`);
       }
       throw error;
+    }
+  }
+
+  async getInterpolatedPoint(
+    id: string,
+    progress: number,
+  ): Promise<[number, number] | null> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const rows: Array<{ point: string }> = await this.prisma.$queryRaw`
+      SELECT ST_AsGeoJSON(ST_LineInterpolatePoint(path, ${progress})) as point
+      FROM "Route"
+      WHERE id = ${id} AND path IS NOT NULL
+    `;
+
+    const row = rows[0];
+    if (!row?.point) return null;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      const geojson = JSON.parse(row.point) as {
+        type: string;
+        coordinates: [number, number];
+      };
+      return geojson.coordinates; // [lon, lat]
+    } catch {
+      return null;
     }
   }
 
