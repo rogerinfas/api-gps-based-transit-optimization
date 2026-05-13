@@ -5,6 +5,7 @@ import { DeleteRouteUseCase } from '@use-cases/route/delete-route.use-case';
 import { FindAllRoutesUseCase } from '@use-cases/route/find-all-routes.use-case';
 import { FindRouteByIdUseCase } from '@use-cases/route/find-route-by-id.use-case';
 import { UpdateRouteUseCase } from '@use-cases/route/update-route.use-case';
+import { GetRouteSimulationUseCase } from '@use-cases/route/get-route-simulation.use-case';
 import { ROUTE_REPOSITORY } from '@repositories/route/route.repository';
 import { PrismaRouteRepository } from '@persistence/route/prisma-route.repository';
 import { RouteController } from '@controllers/route/route.controller';
@@ -18,6 +19,7 @@ import { RouteController } from '@controllers/route/route.controller';
     FindRouteByIdUseCase,
     UpdateRouteUseCase,
     DeleteRouteUseCase,
+    GetRouteSimulationUseCase,
     {
       provide: ROUTE_REPOSITORY,
       useClass: PrismaRouteRepository,

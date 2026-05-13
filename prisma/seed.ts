@@ -8,136 +8,100 @@ const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const routesSeed = [
-  {
-    code: 'AQP-CHAR-LA',
-    name: 'CHARACATO L A',
-    description: 'Ruta urbana Characato - Linea A',
-    isActive: true,
-  },
-  {
-    code: 'AQP-CHAR-LB',
-    name: 'CHARACATO L B',
-    description: 'Ruta urbana Characato - Linea B',
-    isActive: true,
-  },
-  {
-    code: 'AQP-CHAR-MOY',
-    name: 'CHARACATO MOYEBAYA',
-    description: 'Ruta Characato hacia Moyebaya',
-    isActive: true,
-  },
-  {
-    code: 'AQP-CHAR-PEN',
-    name: 'CHARACATO PENAL',
-    description: 'Ruta Characato - Penal de Socabaya',
-    isActive: true,
-  },
-];
-
-const busesSeed = [
-  {
-    code: 'BUS-AQP-001',
-    plateNumber: 'ABC-123',
-    status: VehicleStatus.ACTIVE,
-    capacity: 80,
-    routeCode: 'AQP-CHAR-LA',
-  },
-  {
-    code: 'BUS-AQP-002',
-    plateNumber: 'A1B-456',
-    status: VehicleStatus.ACTIVE,
-    capacity: 70,
-    routeCode: 'AQP-CHAR-LB',
-  },
-  {
-    code: 'BUS-AQP-003',
-    plateNumber: 'B2C-789',
-    status: VehicleStatus.MAINTENANCE,
-    capacity: 65,
-    routeCode: 'AQP-CHAR-MOY',
-  },
-  {
-    code: 'BUS-AQP-004',
-    plateNumber: 'C3D-234',
-    status: VehicleStatus.INACTIVE,
-    capacity: 75,
-    routeCode: 'AQP-CHAR-PEN',
-  },
-  {
-    code: 'BUS-AQP-005',
-    plateNumber: 'D4E-567',
-    status: VehicleStatus.ACTIVE,
-    capacity: 90,
-    routeCode: 'AQP-CHAR-LA',
-  },
-];
-
 async function main() {
-  const routeIdByCode = new Map<string, string>();
+  console.log('Iniciando seed con soporte PostGIS...');
 
-  for (const route of routesSeed) {
-    const savedRoute = await prisma.route.upsert({
-      where: { code: route.code },
-      update: {
-        name: route.name,
-        description: route.description,
-        isActive: route.isActive,
-      },
-      create: {
-        code: route.code,
-        name: route.name,
-        description: route.description,
-        isActive: route.isActive,
-      },
-      select: { id: true, code: true },
-    });
-    routeIdByCode.set(savedRoute.code, savedRoute.id);
-  }
+  // 1. Crear Ruta T1
+  const routeT1 = await prisma.route.upsert({
+    where: { code: 'SIT-T1' },
+    update: {},
+    create: {
+      code: 'SIT-T1',
+      name: 'Ruta T1 - Characato a El Palomar',
+      description: 'Ruta Estructurante C-8 SIT Arequipa',
+      isActive: true,
+    },
+  });
 
-  for (const bus of busesSeed) {
-    const routeId = routeIdByCode.get(bus.routeCode) ?? null;
-    const existing = await prisma.vehicle.findFirst({
-      where: {
-        OR: [{ code: bus.code }, { plateNumber: bus.plateNumber }],
-      },
-      select: { id: true },
-    });
+  // 2. Establecer Geometría de la Ruta (LineString) via Raw SQL
+  const pathWkt = 'LINESTRING(' + [
+    '-71.4883 -16.4716',
+    '-71.4930 -16.4670',
+    '-71.5034 -16.4586',
+    '-71.5150 -16.4450',
+    '-71.5200 -16.4350',
+    '-71.5235 -16.4215',
+    '-71.5280 -16.4100',
+    '-71.5310 -16.4060'
+  ].join(',') + ')';
 
-    if (existing) {
-      await prisma.vehicle.update({
-        where: { id: existing.id },
-        data: {
-          code: bus.code,
-          plateNumber: bus.plateNumber,
-          status: bus.status,
-          capacity: bus.capacity,
-          routeId,
-        },
-      });
-      continue;
-    }
-
-    await prisma.vehicle.create({
-      data: {
-        code: bus.code,
-        plateNumber: bus.plateNumber,
-        status: bus.status,
-        capacity: bus.capacity,
-        routeId,
-      },
-    });
-  }
-
-  console.log(
-    `Seed completado: ${routesSeed.length} rutas y ${busesSeed.length} buses de Arequipa (AQP) cargados.`,
+  await prisma.$executeRawUnsafe(
+    `UPDATE "Route" SET path = ST_GeomFromText($1, 4326) WHERE id = $2`,
+    pathWkt,
+    routeT1.id
   );
+
+  // 3. Crear Paradas Principales
+  const stopsData = [
+    { code: 'STOP-001', name: 'Terminal Characato', lat: -16.4716, lon: -71.4883, order: 1 },
+    { code: 'STOP-002', name: 'Plaza Characato', lat: -16.4670, lon: -71.4930, order: 2 },
+    { code: 'STOP-003', name: 'Sabandía', lat: -16.4586, lon: -71.5034, order: 3 },
+    { code: 'STOP-004', name: 'Av. Lambramani', lat: -16.4215, lon: -71.5235, order: 4 },
+    { code: 'STOP-005', name: 'Mercado El Palomar', lat: -16.4060, lon: -71.5310, order: 5 },
+  ];
+
+  for (const s of stopsData) {
+    const stop = await prisma.stop.upsert({
+      where: { code: s.code },
+      update: {},
+      create: {
+        code: s.code,
+        name: s.name,
+        latitude: s.lat,
+        longitude: s.lon,
+      },
+    });
+
+    // Actualizar ubicación PostGIS
+    await prisma.$executeRawUnsafe(
+      `UPDATE "Stop" SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3`,
+      s.lon,
+      s.lat,
+      stop.id
+    );
+
+    // Relacionar con la ruta
+    await prisma.routeStop.upsert({
+      where: { routeId_stopId: { routeId: routeT1.id, stopId: stop.id } },
+      update: { stopOrder: s.order },
+      create: {
+        routeId: routeT1.id,
+        stopId: stop.id,
+        stopOrder: s.order,
+      },
+    });
+  }
+
+  // 4. Crear Vehículo para la ruta
+  await prisma.vehicle.upsert({
+    where: { code: 'BUS-T1-01' },
+    update: { routeId: routeT1.id },
+    create: {
+      code: 'BUS-T1-01',
+      plateNumber: 'V4K-900',
+      status: VehicleStatus.ACTIVE,
+      capacity: 50,
+      routeId: routeT1.id,
+    },
+  });
+
+  console.log('Seed completado con éxito.');
 }
 
 void main()
-  .catch((error) => {
-    console.error('Error ejecutando seed de vehículos:', error);
-    process.exitCode = 1;
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();

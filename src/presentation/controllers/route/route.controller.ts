@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiConflictResponse,
@@ -17,6 +18,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateRouteUseCase } from '@use-cases/route/create-route.use-case';
@@ -24,6 +26,7 @@ import { DeleteRouteUseCase } from '@use-cases/route/delete-route.use-case';
 import { FindAllRoutesUseCase } from '@use-cases/route/find-all-routes.use-case';
 import { FindRouteByIdUseCase } from '@use-cases/route/find-route-by-id.use-case';
 import { UpdateRouteUseCase } from '@use-cases/route/update-route.use-case';
+import { GetRouteSimulationUseCase } from '@use-cases/route/get-route-simulation.use-case';
 import { CreateRouteDto } from '@dtos/route/create-route.dto';
 import { UpdateRouteDto } from '@dtos/route/update-route.dto';
 import { RouteResponseDto } from '@dtos/route/route-response.dto';
@@ -37,6 +40,7 @@ export class RouteController {
     private readonly findRouteByIdUseCase: FindRouteByIdUseCase,
     private readonly updateRouteUseCase: UpdateRouteUseCase,
     private readonly deleteRouteUseCase: DeleteRouteUseCase,
+    private readonly getRouteSimulationUseCase: GetRouteSimulationUseCase,
   ) {}
 
   @Post()
@@ -104,5 +108,24 @@ export class RouteController {
   @ApiNotFoundResponse({ description: 'Ruta no encontrada' })
   async remove(@Param('id') id: string): Promise<void> {
     await this.deleteRouteUseCase.execute(id);
+  }
+
+  @Get(':id/simulate')
+  @ApiOperation({ summary: 'Obtener un punto interpolado para simulación' })
+  @ApiParam({ name: 'id', description: 'Identificador de la ruta' })
+  @ApiQuery({
+    name: 'progress',
+    description: 'Progreso de la ruta (0.0 a 1.0)',
+    example: 0.5,
+  })
+  @ApiOkResponse({
+    description: 'Punto interpolado [lon, lat]',
+    type: [Number],
+  })
+  async simulate(
+    @Param('id') id: string,
+    @Query('progress') progress: string,
+  ): Promise<[number, number]> {
+    return this.getRouteSimulationUseCase.execute(id, parseFloat(progress));
   }
 }
