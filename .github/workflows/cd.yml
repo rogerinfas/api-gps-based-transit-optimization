@@ -113,4 +113,5 @@ jobs:
             docker compose -p transit-backend -f docker/docker-compose.prod.yml pull api
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d postgres
             docker compose -p transit-backend -f docker/docker-compose.prod.yml run --rm api pnpm prisma:migrate:deploy
+            docker compose -p transit-backend -f docker/docker-compose.prod.yml run --rm api node dist/prisma/seed.js
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d api
