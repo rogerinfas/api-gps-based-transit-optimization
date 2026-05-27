@@ -8,6 +8,8 @@ import { DeleteRouteUseCase } from '@use-cases/route/delete-route.use-case';
 import { GetRouteSimulationUseCase } from '@use-cases/route/get-route-simulation.use-case';
 import { UploadRouteImageUseCase } from '@use-cases/route/upload-route-image.use-case';
 import { Route } from '@entities/route/route.entity';
+import { CreateRouteDto } from '@dtos/route/create-route.dto';
+import { UpdateRouteDto } from '@dtos/route/update-route.dto';
 
 describe('RouteController (presentation)', () => {
   let controller: RouteController;
@@ -47,7 +49,10 @@ describe('RouteController (presentation)', () => {
         { provide: FindRouteByIdUseCase, useValue: findRouteByIdUseCase },
         { provide: UpdateRouteUseCase, useValue: updateRouteUseCase },
         { provide: DeleteRouteUseCase, useValue: deleteRouteUseCase },
-        { provide: GetRouteSimulationUseCase, useValue: getRouteSimulationUseCase },
+        {
+          provide: GetRouteSimulationUseCase,
+          useValue: getRouteSimulationUseCase,
+        },
         { provide: UploadRouteImageUseCase, useValue: uploadRouteImageUseCase },
       ],
     }).compile();
@@ -59,7 +64,7 @@ describe('RouteController (presentation)', () => {
     createRouteUseCase.execute.mockResolvedValue(route);
 
     const dto = { code: 'R-01', name: 'Ruta 1' };
-    const result = await controller.create(dto as any);
+    const result = await controller.create(dto as unknown as CreateRouteDto);
 
     expect(createRouteUseCase.execute).toHaveBeenCalledWith(dto);
     expect(result.id).toBe(route.id);
@@ -89,7 +94,10 @@ describe('RouteController (presentation)', () => {
     updateRouteUseCase.execute.mockResolvedValue(route);
 
     const dto = { name: 'Ruta Modificada' };
-    const result = await controller.update(route.id, dto as any);
+    const result = await controller.update(
+      route.id,
+      dto as unknown as UpdateRouteDto,
+    );
 
     expect(updateRouteUseCase.execute).toHaveBeenCalledWith(route.id, dto);
     expect(result.id).toBe(route.id);
@@ -104,12 +112,15 @@ describe('RouteController (presentation)', () => {
   });
 
   it('GET /routes/:id/simulate obtiene punto interpolado', async () => {
-    getRouteSimulationUseCase.execute.mockResolvedValue([-71.5375, -16.4090]);
+    getRouteSimulationUseCase.execute.mockResolvedValue([-71.5375, -16.409]);
 
     const result = await controller.simulate(route.id, '0.5');
 
-    expect(getRouteSimulationUseCase.execute).toHaveBeenCalledWith(route.id, 0.5);
-    expect(result).toEqual([-71.5375, -16.4090]);
+    expect(getRouteSimulationUseCase.execute).toHaveBeenCalledWith(
+      route.id,
+      0.5,
+    );
+    expect(result).toEqual([-71.5375, -16.409]);
   });
 
   it('POST /routes/:id/image sube una imagen', async () => {
