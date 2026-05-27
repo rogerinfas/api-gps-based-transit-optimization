@@ -24,13 +24,15 @@ model Route {
   code          String          @unique
   name          String
   description   String?
+  imageUrl      String?
   isActive      Boolean         @default(true)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   routeStops    RouteStop[]
   vehicles      Vehicle[]
   etaPredictions EtaPrediction[]
-  path          Unsupported("geometry(LineString, 4326)")?
+  outboundPath  Unsupported("geometry(LineString, 4326)")?
+  returnPath    Unsupported("geometry(LineString, 4326)")?
 
   @@index([isActive])
 }
