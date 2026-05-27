@@ -47,7 +47,7 @@ describe('VehicleController (presentation)', () => {
     controller = module.get(VehicleController);
   });
 
-  it('POST delega a servicio con datos mapeados', async () => {
+  it('POST delega a servicio', async () => {
     createVehicleUseCase.execute.mockResolvedValue(vehicle);
 
     const dto = { code: 'L-1' };
@@ -55,10 +55,6 @@ describe('VehicleController (presentation)', () => {
 
     expect(createVehicleUseCase.execute).toHaveBeenCalledWith({
       code: 'L-1',
-      plateNumber: null,
-      status: 'ACTIVE',
-      capacity: null,
-      routeId: null,
     });
     expect(result.id).toBe('v1');
     expect(result.code).toBe('L-1');

@@ -27,7 +27,6 @@ import { UpdateVehicleUseCase } from '@use-cases/vehicle/update-vehicle.use-case
 import { CreateVehicleDto } from '@dtos/vehicle/create-vehicle.dto';
 import { UpdateVehicleDto } from '@dtos/vehicle/update-vehicle.dto';
 import { VehicleResponseDto } from '@dtos/vehicle/vehicle-response.dto';
-import { VehicleStatuses } from '@entities/vehicle/vehicle-status';
 
 @ApiTags('Vehicles')
 @Controller('vehicles')
@@ -47,13 +46,7 @@ export class VehicleController {
   async create(
     @Body() createVehicleDto: CreateVehicleDto,
   ): Promise<VehicleResponseDto> {
-    const vehicle = await this.createVehicleUseCase.execute({
-      code: createVehicleDto.code,
-      plateNumber: createVehicleDto.plateNumber ?? null,
-      status: createVehicleDto.status ?? VehicleStatuses[0],
-      capacity: createVehicleDto.capacity ?? null,
-      routeId: createVehicleDto.routeId ?? null,
-    });
+    const vehicle = await this.createVehicleUseCase.execute(createVehicleDto);
     return VehicleResponseDto.fromDomain(vehicle);
   }
 
@@ -85,23 +78,7 @@ export class VehicleController {
     @Param('id') id: string,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ): Promise<VehicleResponseDto> {
-    const vehicle = await this.updateVehicleUseCase.execute(id, {
-      ...(updateVehicleDto.code !== undefined && {
-        code: updateVehicleDto.code,
-      }),
-      ...(updateVehicleDto.plateNumber !== undefined && {
-        plateNumber: updateVehicleDto.plateNumber,
-      }),
-      ...(updateVehicleDto.status !== undefined && {
-        status: updateVehicleDto.status,
-      }),
-      ...(updateVehicleDto.capacity !== undefined && {
-        capacity: updateVehicleDto.capacity,
-      }),
-      ...(updateVehicleDto.routeId !== undefined && {
-        routeId: updateVehicleDto.routeId,
-      }),
-    });
+    const vehicle = await this.updateVehicleUseCase.execute(id, updateVehicleDto);
     return VehicleResponseDto.fromDomain(vehicle);
   }
 
