@@ -52,7 +52,7 @@ async function main() {
   ].join(',') + ')';
 
   await prisma.$executeRawUnsafe(
-    `UPDATE "Route" SET path = ST_GeomFromText($1, 4326) WHERE id = $2`,
+    `UPDATE "Route" SET "outboundPath" = ST_GeomFromText($1, 4326) WHERE id = $2::uuid`,
     pathWkt,
     routeT1.id
   );
@@ -81,7 +81,7 @@ async function main() {
 
     // Actualizar ubicación PostGIS
     await prisma.$executeRawUnsafe(
-      `UPDATE "Stop" SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3`,
+      `UPDATE "Stop" SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3::uuid`,
       s.lon,
       s.lat,
       stop.id

@@ -33,7 +33,8 @@
       "@controllers/*": ["src/presentation/controllers/*"],
       "@dtos/*": ["src/presentation/dtos/*"],
       "@presentation/*": ["src/presentation/*"],
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@storage/*": ["libs/storage/src/*"]
     }
   }
 }

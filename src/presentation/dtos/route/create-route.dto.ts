@@ -39,8 +39,16 @@ export class CreateRouteDto {
   })
   @IsOptional()
   @IsString()
-  @MaxLength(255)
-  description?: string | null;
+  @IsOptional()
+  description?: string;
+
+  @ApiPropertyOptional({
+    description: 'URL de la imagen del bus/ruta',
+    example: 'https://ejemplo.com/bus.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
 
   @ApiPropertyOptional({
     description: 'Indica si la ruta está operativa',
