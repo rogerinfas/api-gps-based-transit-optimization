@@ -20,7 +20,7 @@ enum VehicleStatus {
 }
 
 model Route {
-  id            String          @id @default(cuid())
+  id            String          @id @default(uuid()) @db.Uuid
   code          String          @unique
   name          String
   description   String?
@@ -38,7 +38,7 @@ model Route {
 }
 
 model Stop {
-  id             String          @id @default(cuid())
+  id             String          @id @default(uuid()) @db.Uuid
   code           String          @unique
   name           String
   latitude       Decimal         @db.Decimal(9, 6)
@@ -54,8 +54,8 @@ model Stop {
 }
 
 model RouteStop {
-  routeId                     String
-  stopId                      String
+  routeId                     String   @db.Uuid
+  stopId                      String   @db.Uuid
   stopOrder                   Int
   distanceFromRouteStartMeters Int?
   plannedTravelSeconds        Int?
@@ -70,12 +70,12 @@ model RouteStop {
 }
 
 model Vehicle {
-  id             String          @id @default(cuid())
+  id             String          @id @default(uuid()) @db.Uuid
   code           String          @unique
   plateNumber    String?         @unique
   status         VehicleStatus   @default(ACTIVE)
   capacity       Int?
-  routeId        String?
+  routeId        String?         @db.Uuid
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   route          Route?          @relation(fields: [routeId], references: [id], onDelete: SetNull)
@@ -87,8 +87,8 @@ model Vehicle {
 }
 
 model GpsPosition {
-  id             String    @id @default(cuid())
-  vehicleId      String
+  id             String    @id @default(uuid()) @db.Uuid
+  vehicleId      String    @db.Uuid
   latitude       Decimal   @db.Decimal(9, 6)
   longitude      Decimal   @db.Decimal(9, 6)
   speedKph       Decimal?  @db.Decimal(5, 2)
@@ -102,10 +102,10 @@ model GpsPosition {
 }
 
 model EtaPrediction {
-  id                 String    @id @default(cuid())
-  vehicleId          String
-  routeId            String
-  stopId             String
+  id                 String    @id @default(uuid()) @db.Uuid
+  vehicleId          String    @db.Uuid
+  routeId            String    @db.Uuid
+  stopId             String    @db.Uuid
   etaSeconds         Int
   predictedArrivalAt DateTime
   confidence         Decimal?  @db.Decimal(5, 2)
