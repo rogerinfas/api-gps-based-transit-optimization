@@ -5,10 +5,12 @@ export type RouteRow = {
   code: string;
   name: string;
   description: string | null;
+  imageUrl: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  path?: string; // GeoJSON string from PostGIS
+  outboundPath?: string; // GeoJSON string from PostGIS
+  returnPath?: string;
 };
 
 interface GeoJSONLineString {
@@ -18,16 +20,28 @@ interface GeoJSONLineString {
 
 export class PrismaRouteMapper {
   static toDomain(row: RouteRow): Route {
-    let coordinates: [number, number][] | undefined;
+    let outboundCoordinates: [number, number][] | undefined;
+    let returnCoordinates: [number, number][] | undefined;
 
-    if (row.path) {
+    if (row.outboundPath) {
       try {
-        const geojson = JSON.parse(row.path) as GeoJSONLineString;
+        const geojson = JSON.parse(row.outboundPath) as GeoJSONLineString;
         if (geojson.type === 'LineString') {
-          coordinates = geojson.coordinates;
+          outboundCoordinates = geojson.coordinates;
         }
       } catch (e) {
-        console.error('Error parsing route path GeoJSON:', e);
+        console.error('Error parsing route outboundPath GeoJSON:', e);
+      }
+    }
+
+    if (row.returnPath) {
+      try {
+        const geojson = JSON.parse(row.returnPath) as GeoJSONLineString;
+        if (geojson.type === 'LineString') {
+          returnCoordinates = geojson.coordinates;
+        }
+      } catch (e) {
+        console.error('Error parsing route returnPath GeoJSON:', e);
       }
     }
 
@@ -36,10 +50,12 @@ export class PrismaRouteMapper {
       code: row.code,
       name: row.name,
       description: row.description,
+      imageUrl: row.imageUrl,
       isActive: row.isActive,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-      path: coordinates,
+      outboundPath: outboundCoordinates,
+      returnPath: returnCoordinates,
     });
   }
 }
