@@ -78,7 +78,10 @@ export class VehicleController {
     @Param('id') id: string,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ): Promise<VehicleResponseDto> {
-    const vehicle = await this.updateVehicleUseCase.execute(id, updateVehicleDto);
+    const vehicle = await this.updateVehicleUseCase.execute(
+      id,
+      updateVehicleDto,
+    );
     return VehicleResponseDto.fromDomain(vehicle);
   }
 
