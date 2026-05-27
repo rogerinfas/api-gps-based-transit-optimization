@@ -330,6 +330,102 @@
           "Routes"
         ]
       }
+    },
+    "/routes/{id}/image": {
+      "post": {
+        "operationId": "RouteController_uploadImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada"
+          }
+        },
+        "summary": "Subir o reemplazar la imagen de una ruta",
+        "tags": [
+          "Routes"
+        ]
+      }
+    },
+    "/routes/{id}/simulate": {
+      "get": {
+        "operationId": "RouteController_simulate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "progress",
+            "required": true,
+            "in": "query",
+            "description": "Progreso de la ruta (0.0 a 1.0)",
+            "schema": {
+              "example": 0.5,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Punto interpolado [lon, lat]",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Obtener un punto interpolado para simulación",
+        "tags": [
+          "Routes"
+        ]
+      }
     }
   },
   "info": {
@@ -512,11 +608,16 @@
             "maxLength": 120
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Descripción opcional para operaciones",
             "example": "Ruta urbana Characato - Linea A",
             "maxLength": 255,
             "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL de la imagen del bus/ruta",
+            "example": "https://ejemplo.com/bus.jpg"
           },
           "isActive": {
             "type": "boolean",
@@ -553,6 +654,12 @@
             "example": "Ruta urbana Characato - Linea A",
             "nullable": true
           },
+          "imageUrl": {
+            "type": "object",
+            "description": "URL de la imagen de la ruta",
+            "example": "https://ejemplo.com/bus.jpg",
+            "nullable": true
+          },
           "isActive": {
             "type": "boolean",
             "description": "Indica si la ruta está operativa",
@@ -567,6 +674,46 @@
             "type": "string",
             "description": "Fecha de última actualización en ISO 8601",
             "example": "2026-04-28T15:00:00.000Z"
+          },
+          "outboundPath": {
+            "type": "array",
+            "description": "Geometría de la ruta de Ida en formato de coordenadas [[lon, lat], ...]",
+            "example": [
+              [
+                -71.4883,
+                -16.4716
+              ],
+              [
+                -71.531,
+                -16.406
+              ]
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "returnPath": {
+            "type": "array",
+            "description": "Geometría de la ruta de Regreso en formato de coordenadas [[lon, lat], ...]",
+            "example": [
+              [
+                -71.531,
+                -16.406
+              ],
+              [
+                -71.4883,
+                -16.4716
+              ]
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
           }
         },
         "required": [
@@ -574,6 +721,7 @@
           "code",
           "name",
           "description",
+          "imageUrl",
           "isActive",
           "createdAt",
           "updatedAt"
@@ -597,16 +745,55 @@
             "maxLength": 120
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Descripción opcional para operaciones",
             "example": "Ruta urbana Characato - Linea A",
             "maxLength": 255,
             "nullable": true
           },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL de la imagen del bus/ruta",
+            "example": "https://ejemplo.com/bus.jpg"
+          },
           "isActive": {
             "type": "boolean",
             "description": "Indica si la ruta está operativa",
             "example": true
+          },
+          "outboundPathGeoJson": {
+            "type": "object",
+            "description": "Geometría LineString (GeoJSON) para la ruta de Ida",
+            "example": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -71.53,
+                  -16.4
+                ],
+                [
+                  -71.54,
+                  -16.41
+                ]
+              ]
+            }
+          },
+          "returnPathGeoJson": {
+            "type": "object",
+            "description": "Geometría LineString (GeoJSON) para la ruta de Regreso",
+            "example": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -71.54,
+                  -16.41
+                ],
+                [
+                  -71.53,
+                  -16.4
+                ]
+              ]
+            }
           }
         }
       }

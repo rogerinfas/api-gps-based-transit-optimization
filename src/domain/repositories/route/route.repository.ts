@@ -6,6 +6,7 @@ export interface CreateRouteData {
   code: string;
   name: string;
   description?: string | null;
+  imageUrl?: string | null;
   isActive?: boolean;
 }
 
@@ -13,7 +14,10 @@ export interface UpdateRouteData {
   code?: string;
   name?: string;
   description?: string | null;
+  imageUrl?: string | null;
   isActive?: boolean;
+  outboundPathGeoJson?: any;
+  returnPathGeoJson?: any;
 }
 
 export interface IRouteRepository {
