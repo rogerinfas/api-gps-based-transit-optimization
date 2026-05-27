@@ -103,6 +103,12 @@ jobs:
             DATABASE_URL='postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public'
             IMAGE_TAG='${IMAGE_TAG}'
             API_IMAGE='${IMAGE_REPO}:${IMAGE_TAG}'
+            R2_BUCKET_NAME='api-gps'
+            R2_ACCOUNT_ID='95f38f4233f5972e6b3d43ede8413d76'
+            R2_ACCESS_KEY_ID='553d0ce3668377083378dc228086039c'
+            R2_SECRET_ACCESS_KEY='a444564785cbb1e570b5f7eb3c44280119501c3920df0da2fa47795cca06fa9b'
+            R2_PUBLIC_URL='https://pub-4331106b91db442db04623a4fff476df.r2.dev'
+            CORS_ORIGINS='http://localhost:3000,http://127.0.0.1:3000,https://gps-based-transit-optimization.onlinestornsoftware.win'
             EOF
 
             # Limpiar contenedores antiguos del proyecto por defecto para liberar puertos
