@@ -1,4 +1,5 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: migration
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -271,7 +272,6 @@ export class CloudflareR2Adapter implements StoragePort {
       return Buffer.from([]);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return Buffer.from(await stream.transformToByteArray());
   }
 

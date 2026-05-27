@@ -97,13 +97,18 @@
       "^@dtos/(.*)$": "<rootDir>/presentation/dtos/$1",
       "^@presentation/(.*)$": "<rootDir>/presentation/$1",
       "^@shared/(.*)$": "<rootDir>/shared/$1",
-      "^.*generated/prisma/client$": "<rootDir>/test/prisma-client.mock.ts"
+      "^@storage/(.*)$": "<rootDir>/../libs/storage/src/$1",
+      "^uuid$": "<rootDir>/../test/uuid.mock.ts",
+      "^.*generated/prisma/client$": "<rootDir>/../test/prisma-client.mock.ts"
     },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
+    ],
+    "setupFiles": [
+      "dotenv/config"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
