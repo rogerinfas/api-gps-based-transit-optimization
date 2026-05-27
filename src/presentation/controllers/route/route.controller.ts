@@ -112,9 +112,11 @@ export class RouteController {
         isActive: updateRouteDto.isActive,
       }),
       ...(updateRouteDto.outboundPathGeoJson !== undefined && {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         outboundPathGeoJson: updateRouteDto.outboundPathGeoJson,
       }),
       ...(updateRouteDto.returnPathGeoJson !== undefined && {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         returnPathGeoJson: updateRouteDto.returnPathGeoJson,
       }),
     });

@@ -92,7 +92,8 @@ export class CloudflareR2Adapter implements StoragePort {
         path,
         fileId,
       };
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       this.logger.error(
         `Error al subir archivo: ${error.message}`,
         error.stack,
@@ -128,7 +129,8 @@ export class CloudflareR2Adapter implements StoragePort {
           customMetadata: this.parseMetadata(result.Metadata),
         },
       };
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       this.logger.error(
         `Error al descargar archivo con clave ${key}: ${error.message}`,
         error.stack,
@@ -148,7 +150,8 @@ export class CloudflareR2Adapter implements StoragePort {
       const command = new DeleteObjectCommand(params);
       await this.s3Client.send(command);
       return true;
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       this.logger.error(
         `Error al eliminar archivo con clave ${key}: ${error.message}`,
         error.stack,
@@ -178,7 +181,8 @@ export class CloudflareR2Adapter implements StoragePort {
         lastModified: result.LastModified,
         customMetadata: this.parseMetadata(result.Metadata),
       };
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       this.logger.error(
         `Error al obtener metadatos del archivo con clave ${key}: ${error.message}`,
         error.stack,
@@ -195,7 +199,8 @@ export class CloudflareR2Adapter implements StoragePort {
       });
 
       return await getSignedUrl(this.s3Client, command, { expiresIn });
-    } catch (error) {
+    } catch (e) {
+      const error = e as Error;
       this.logger.error(
         `Error al generar URL prefirmada para ${key}: ${error.message}`,
         error.stack,
@@ -266,6 +271,7 @@ export class CloudflareR2Adapter implements StoragePort {
       return Buffer.from([]);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return Buffer.from(await stream.transformToByteArray());
   }
 
