@@ -5,6 +5,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   Min,
   MinLength,
@@ -56,13 +57,11 @@ export class CreateVehicleDto {
   capacity?: number | null;
 
   @ApiPropertyOptional({
-    description: 'Identificador de la ruta asignada',
-    example: 'ckxyz123',
-    maxLength: 64,
+    description: 'Identificador (UUID) de la ruta asignada',
+    example: '11111111-2222-3333-4444-555555555555',
     nullable: true,
   })
   @IsOptional()
-  @IsString()
-  @MaxLength(64)
+  @IsUUID()
   routeId?: string | null;
 }

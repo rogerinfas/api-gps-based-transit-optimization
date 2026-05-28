@@ -35,10 +35,10 @@ import { FindAllRoutesUseCase } from '@use-cases/route/find-all-routes.use-case'
 import { FindRouteByIdUseCase } from '@use-cases/route/find-route-by-id.use-case';
 import { UpdateRouteUseCase } from '@use-cases/route/update-route.use-case';
 import { GetRouteSimulationUseCase } from '@use-cases/route/get-route-simulation.use-case';
+import { UploadRouteImageUseCase } from '@use-cases/route/upload-route-image.use-case';
 import { CreateRouteDto } from '@dtos/route/create-route.dto';
 import { UpdateRouteDto } from '@dtos/route/update-route.dto';
 import { RouteResponseDto } from '@dtos/route/route-response.dto';
-import { UploadFileUseCase, GetPublicUrlUseCase } from '@storage/index';
 
 @ApiTags('Routes')
 @Controller('routes')
@@ -50,10 +50,8 @@ export class RouteController {
     private readonly updateRouteUseCase: UpdateRouteUseCase,
     private readonly deleteRouteUseCase: DeleteRouteUseCase,
     private readonly getRouteSimulationUseCase: GetRouteSimulationUseCase,
-    private readonly uploadFileUseCase: UploadFileUseCase,
-    private readonly getPublicUrlUseCase: GetPublicUrlUseCase,
+    private readonly uploadRouteImageUseCase: UploadRouteImageUseCase,
   ) {}
-
   @Post()
   @ApiOperation({ summary: 'Crear una ruta' })
   @ApiCreatedResponse({ type: RouteResponseDto })
@@ -61,13 +59,7 @@ export class RouteController {
   async create(
     @Body() createRouteDto: CreateRouteDto,
   ): Promise<RouteResponseDto> {
-    const route = await this.createRouteUseCase.execute({
-      code: createRouteDto.code,
-      name: createRouteDto.name,
-      description: createRouteDto.description ?? null,
-      imageUrl: createRouteDto.imageUrl ?? null,
-      isActive: createRouteDto.isActive ?? true,
-    });
+    const route = await this.createRouteUseCase.execute(createRouteDto);
     return RouteResponseDto.fromDomain(route);
   }
 
@@ -99,27 +91,7 @@ export class RouteController {
     @Param('id') id: string,
     @Body() updateRouteDto: UpdateRouteDto,
   ): Promise<RouteResponseDto> {
-    const route = await this.updateRouteUseCase.execute(id, {
-      ...(updateRouteDto.code !== undefined && { code: updateRouteDto.code }),
-      ...(updateRouteDto.name !== undefined && { name: updateRouteDto.name }),
-      ...(updateRouteDto.description !== undefined && {
-        description: updateRouteDto.description,
-      }),
-      ...(updateRouteDto.imageUrl !== undefined && {
-        imageUrl: updateRouteDto.imageUrl,
-      }),
-      ...(updateRouteDto.isActive !== undefined && {
-        isActive: updateRouteDto.isActive,
-      }),
-      ...(updateRouteDto.outboundPathGeoJson !== undefined && {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        outboundPathGeoJson: updateRouteDto.outboundPathGeoJson,
-      }),
-      ...(updateRouteDto.returnPathGeoJson !== undefined && {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        returnPathGeoJson: updateRouteDto.returnPathGeoJson,
-      }),
-    });
+    const route = await this.updateRouteUseCase.execute(id, updateRouteDto);
     return RouteResponseDto.fromDomain(route);
   }
 
@@ -153,28 +125,17 @@ export class RouteController {
     )
     file: Express.Multer.File,
   ): Promise<RouteResponseDto> {
-    const route = await this.findRouteByIdUseCase.execute(id);
-
-    // Subir el archivo usando la lib de storage
-    const metadata = await this.uploadFileUseCase.execute(
-      {
+    const route = await this.uploadRouteImageUseCase.execute({
+      routeId: id,
+      file: {
         buffer: file.buffer,
-        filename: file.originalname,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
         size: file.size,
       },
-      { path: `rutas/${route.code}` },
-    );
-
-    // Obtener la URL pública mediante el caso de uso de la lib
-    const imageUrl = this.getPublicUrlUseCase.execute(metadata.key);
-
-    const updatedRoute = await this.updateRouteUseCase.execute(id, {
-      imageUrl,
     });
 
-    return RouteResponseDto.fromDomain(updatedRoute);
+    return RouteResponseDto.fromDomain(route);
   }
 
   @Delete(':id')
