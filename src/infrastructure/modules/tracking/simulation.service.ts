@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-misused-promises */
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { TrackingGateway } from '../../../presentation/gateways/tracking.gateway';
 import { PrismaService } from '@shared/prisma/prisma.service';

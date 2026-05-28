@@ -8,8 +8,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../infrastructure/modules/auth/jwt-auth.guard';
 
 @WebSocketGateway({
   cors: {
@@ -43,13 +41,13 @@ export class TrackingGateway
     // Leave all previous rooms first (except their own socket ID room)
     client.rooms.forEach((room) => {
       if (room !== client.id) {
-        client.leave(room);
+        void client.leave(room);
       }
     });
 
     // Join new rooms
     routeIds.forEach((routeId) => {
-      client.join(routeId);
+      void client.join(routeId);
     });
 
     return { event: 'subscribed', data: routeIds };
