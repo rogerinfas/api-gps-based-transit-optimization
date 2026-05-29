@@ -79,8 +79,27 @@ describe('Route use cases (application)', () => {
     getSimulationUseCase = module.get(GetRouteSimulationUseCase);
   });
 
+  /**
+   * CASO DE USO: CreateRouteUseCase (Creación de Rutas SIT)
+   * 
+   * Comprensión del Caso de Uso:
+   * En el contexto de Clean Architecture, este caso de uso representa la regla de negocio
+   * aplicada para registrar una nueva ruta del Sistema Integrado de Transporte (SIT) en Arequipa.
+   * Su responsabilidad comprende:
+   * 1. Recibir los datos de entrada (nombre, color corporativo, estado activo y la geometría de la ruta).
+   * 2. Validar los datos de entrada mediante DTOs.
+   * 3. Delegar la persistencia e inserción en la base de datos al puerto del repositorio (IRouteRepository).
+   * 4. Devolver la entidad de dominio 'Route' resultante.
+   * 
+   * Validación del Test Unitario:
+   * Este test verifica de forma aislada (aislado de la base de datos real mediante mocks) que:
+   * - El caso de uso llama correctamente al método 'create' del repositorio inyectado.
+   * - Retorna de forma íntegra la entidad rehidratada sin alterar la lógica de negocio.
+   */
   it('create delega al repositorio', async () => {
+    // Configura el mock del repositorio para retornar la entidad de ejemplo de forma exitosa
     repository.create.mockResolvedValue(sampleRoute);
+    
     const dto = {
       name: 'Ruta 1',
       color: '#FF0000',
@@ -88,7 +107,11 @@ describe('Route use cases (application)', () => {
       outboundPath: null,
       inboundPath: null,
     };
+    
+    // Ejecuta el caso de uso con el DTO simulado
     const result = await createUseCase.execute(dto);
+    
+    // Verifica que se haya invocado al repositorio y que el resultado coincida con la entidad esperada
     expect(repository.create).toHaveBeenCalled();
     expect(result).toBe(sampleRoute);
   });
