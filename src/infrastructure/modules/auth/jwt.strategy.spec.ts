@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { JwtStrategy } from './jwt.strategy';
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { UnauthorizedException } from '@nestjs/common';
