@@ -29,13 +29,6 @@ export class SystemInitializationService implements OnApplicationBootstrap {
     const adminEmail = process.env.ADMIN_EMAIL || 'user@gps-transit.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'User123!';
 
-    if (!adminEmail || !adminPassword) {
-      this.logger.warn(
-        '⚠️ ADMIN_EMAIL o ADMIN_PASSWORD no configurados, omitiendo creación de usuario admin',
-      );
-      return;
-    }
-
     this.logger.log('👤 Verificando usuario administrador...');
 
     const existingUser = await this.prisma.user.findUnique({
