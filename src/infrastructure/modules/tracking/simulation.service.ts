@@ -13,6 +13,10 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
     private prisma: PrismaService,
   ) {}
 
+  public getProgress(routeId: string): number {
+    return this.progressMap.get(routeId) || 0;
+  }
+
   onModuleInit() {
     this.startSimulation();
   }
@@ -26,7 +30,7 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
     this.interval = setInterval(async () => {
       try {
         const routes = await this.prisma.$queryRaw<any[]>`
-          SELECT id, "outboundPath" FROM "Route" WHERE "isActive" = true AND "outboundPath" IS NOT NULL
+          SELECT id, "outboundPath", "returnPath" FROM "Route" WHERE "isActive" = true AND "outboundPath" IS NOT NULL
         `;
 
         for (const route of routes) {
@@ -41,11 +45,27 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
           this.progressMap.set(routeId, progress);
 
           // Calculate interpolated point using PostGIS
-          const result = await this.prisma.$queryRaw<any[]>`
-            SELECT ST_AsGeoJSON(ST_LineInterpolatePoint("outboundPath", ${progress})) as point
-            FROM "Route"
-            WHERE id = ${routeId}::uuid
-          `;
+          // If progress <= 0.5 -> Outbound path (0.0 to 1.0 scaling)
+          // If progress > 0.5 -> Return path (0.0 to 1.0 scaling). Reverses outboundPath if returnPath is null.
+          let result: any[];
+          if (progress <= 0.5) {
+            const outboundProgress = progress * 2;
+            result = await this.prisma.$queryRaw<any[]>`
+              SELECT ST_AsGeoJSON(ST_LineInterpolatePoint("outboundPath", ${outboundProgress})) as point
+              FROM "Route"
+              WHERE id = ${routeId}::uuid
+            `;
+          } else {
+            const returnProgress = (progress - 0.5) * 2;
+            result = await this.prisma.$queryRaw<any[]>`
+              SELECT ST_AsGeoJSON(ST_LineInterpolatePoint(
+                COALESCE("returnPath", ST_Reverse("outboundPath")), 
+                ${returnProgress}
+              )) as point
+              FROM "Route"
+              WHERE id = ${routeId}::uuid
+            `;
+          }
 
           if (result && result.length > 0 && result[0].point) {
             const geojson = JSON.parse(result[0].point);
