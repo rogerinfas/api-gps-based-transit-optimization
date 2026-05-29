@@ -25,11 +25,18 @@ export class EtaService {
   async getNearestStop(lat: number, lng: number, routeId?: string) {
     let row: NearestStopRow | undefined;
 
-    if (routeId) {
+    // Validate if routeId is a valid UUID format
+    const isValidUuid =
+      routeId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        routeId,
+      );
+
+    if (isValidUuid) {
       const rows = await this.prisma.$queryRaw<NearestStopRow[]>`
         SELECT s.id, s.name, s.latitude::float as latitude, s.longitude::float as longitude,
                ST_DistanceSphere(
-                 s.location, 
+                 ST_SetSRID(ST_MakePoint(s.longitude::float, s.latitude::float), 4326), 
                  ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
                ) as "distanceMeters"
         FROM "Stop" s
@@ -43,7 +50,7 @@ export class EtaService {
       const rows = await this.prisma.$queryRaw<NearestStopRow[]>`
         SELECT s.id, s.name, s.latitude::float as latitude, s.longitude::float as longitude,
                ST_DistanceSphere(
-                 s.location, 
+                 ST_SetSRID(ST_MakePoint(s.longitude::float, s.latitude::float), 4326), 
                  ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
                ) as "distanceMeters"
         FROM "Stop" s
@@ -74,11 +81,26 @@ export class EtaService {
   }
 
   async getBusArrivalEta(routeId: string, stopId: string) {
+    const isValidRouteUuid =
+      routeId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        routeId,
+      );
+    const isValidStopUuid =
+      stopId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        stopId,
+      );
+
+    if (!isValidRouteUuid || !isValidStopUuid) {
+      throw new NotFoundException('Route or Stop not found with valid UUID.');
+    }
+
     // 1. Get the route path length and the stop position along the path in meters
     const routeData = await this.prisma.$queryRaw<RouteStopRow[]>`
       SELECT 
         ST_Length(r."outboundPath"::geography) as "totalLengthMeters",
-        ST_Length(ST_LineSubstring(r."outboundPath", 0, ST_LineLocatePoint(r."outboundPath", s.location))::geography) as "stopDistanceMeters"
+        ST_Length(ST_LineSubstring(r."outboundPath", 0, ST_LineLocatePoint(r."outboundPath", ST_SetSRID(ST_MakePoint(s.longitude::float, s.latitude::float), 4326)))::geography) as "stopDistanceMeters"
       FROM "Route" r, "Stop" s
       WHERE r.id = ${routeId}::uuid AND s.id = ${stopId}::uuid
     `;
