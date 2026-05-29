@@ -15,7 +15,7 @@ import { UploadFileUseCase, GetPublicUrlUseCase } from '@storage/index';
 
 /**
  * CONTEXTO: Pruebas Unitarias de los Casos de Uso del Aplicación de Rutas (SIT)
- * 
+ *
  * Este conjunto de pruebas valida la capa de aplicación en Clean Architecture.
  * El objetivo es garantizar que la lógica de negocio se ejecute de forma aislada,
  * simulando las dependencias externas (como persistencia en base de datos o almacenamiento en S3).
@@ -100,7 +100,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: CreateRouteUseCase (Creación de Rutas SIT)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Representa el flujo para registrar una nueva ruta con sus trayectorias geográficas.
    * Valida que los datos ingresados deleguen correctamente la inserción en el repositorio.
@@ -127,7 +127,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: FindAllRoutesUseCase (Consulta de todas las rutas del catálogo)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Flujo que consulta y devuelve el listado completo de rutas vigentes para la administración del SIT.
    */
@@ -144,7 +144,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: FindRouteByIdUseCase (Búsqueda de una ruta específica por ID)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Permite obtener el detalle exacto de una ruta a partir de su CUID único.
    * Maneja dos caminos: el camino de error (si no existe) y el camino exitoso.
@@ -171,7 +171,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: UpdateRouteUseCase (Actualización de datos de una ruta)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Flujo operativo para editar la información de una ruta (ej. cambio de nombre o color corporativo).
    */
@@ -187,7 +187,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: DeleteRouteUseCase (Eliminación lógica o física de una ruta)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Permite dar de baja o eliminar una ruta del sistema a partir de su ID.
    */
@@ -203,7 +203,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: UploadRouteImageUseCase (Carga de imagen de mapa/ruta a S3 y base de datos)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Orquestación de infraestructura compleja. Este caso de uso:
    * 1. Busca si la ruta existe.
@@ -241,7 +241,7 @@ describe('Route use cases (application)', () => {
 
   /**
    * CASO DE USO: GetRouteSimulationUseCase (Cálculo e interpolación para simulación de buses)
-   * 
+   *
    * Comprensión del Caso de Uso:
    * Caso de uso espacial clave para el tracking GPS. Interpola una ubicación geoespacial (Point)
    * a lo largo del LineString de la ruta en base a un porcentaje de progreso (0.0 a 1.0).
