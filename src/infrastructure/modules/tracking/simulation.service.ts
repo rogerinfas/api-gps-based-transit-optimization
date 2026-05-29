@@ -13,6 +13,10 @@ export class SimulationService implements OnModuleInit, OnModuleDestroy {
     private prisma: PrismaService,
   ) {}
 
+  public getProgress(routeId: string): number {
+    return this.progressMap.get(routeId) || 0;
+  }
+
   onModuleInit() {
     this.startSimulation();
   }
