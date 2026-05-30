@@ -14,6 +14,13 @@ export interface RouteStopPathData {
 }
 
 export interface IEtaRepository {
-  getNearestStopData(lat: number, lng: number, routeId?: string): Promise<NearestStopData | null>;
-  getRouteStopPathData(routeId: string, stopId: string): Promise<RouteStopPathData | null>;
+  getNearestStopData(
+    lat: number,
+    lng: number,
+    routeId?: string,
+  ): Promise<NearestStopData | null>;
+  getRouteStopPathData(
+    routeId: string,
+    stopId: string,
+  ): Promise<RouteStopPathData | null>;
 }
