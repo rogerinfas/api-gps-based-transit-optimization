@@ -32,6 +32,7 @@ services:
       - proxy_net
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy_net"
       # Regla para capturar el tráfico del WebSocket en el dominio actual
       - "traefik.http.routers.backend-io.rule=Host(`gps-based-transit-optimization.onlinestornsoftware.win`) && PathPrefix(`/socket.io`)"
       - "traefik.http.routers.backend-io.entrypoints=websecure"
