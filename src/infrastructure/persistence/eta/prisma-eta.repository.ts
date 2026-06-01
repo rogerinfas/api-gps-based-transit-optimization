@@ -23,11 +23,28 @@ export class PrismaEtaRepository implements IEtaRepository {
         r.id AS "routeId",
         r.code AS "routeCode",
         r.name AS "routeName",
-        ST_Y(ST_ClosestPoint(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326))) AS latitude,
-        ST_X(ST_ClosestPoint(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326))) AS longitude,
-        ST_DistanceSphere(
-          r."outboundPath",
+        CASE 
+          WHEN r."returnPath" IS NULL THEN 'outbound'
+          WHEN ST_DistanceSphere(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)) <= ST_DistanceSphere(r."returnPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)) THEN 'outbound'
+          ELSE 'return'
+        END AS "closestPathType",
+        ST_Y(ST_ClosestPoint(
+          CASE 
+            WHEN r."returnPath" IS NULL OR ST_DistanceSphere(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)) <= ST_DistanceSphere(r."returnPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)) THEN r."outboundPath"
+            ELSE r."returnPath"
+          END,
           ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
+        )) AS latitude,
+        ST_X(ST_ClosestPoint(
+          CASE 
+            WHEN r."returnPath" IS NULL OR ST_DistanceSphere(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)) <= ST_DistanceSphere(r."returnPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)) THEN r."outboundPath"
+            ELSE r."returnPath"
+          END,
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
+        )) AS longitude,
+        LEAST(
+          ST_DistanceSphere(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)),
+          COALESCE(ST_DistanceSphere(r."returnPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)), 9999999)
         ) AS "distanceMeters"
       FROM "Route" r
       WHERE r."isActive" = true ${routeFilter}
@@ -43,8 +60,9 @@ export class PrismaEtaRepository implements IEtaRepository {
     const row = result[0];
     const virtualLat = Number(row.latitude);
     const virtualLng = Number(row.longitude);
+    const pathType = row.closestPathType;
     return {
-      id: `virtual:${virtualLat}:${virtualLng}`,
+      id: `virtual:${pathType}:${virtualLat}:${virtualLng}`,
       name: `Intersección ${row.routeCode} (Punto Peatonal más cercano)`,
       latitude: virtualLat,
       longitude: virtualLng,
@@ -58,11 +76,14 @@ export class PrismaEtaRepository implements IEtaRepository {
   ): Promise<RouteStopPathData | null> {
     let lat: number;
     let lng: number;
+    let stopIsOnOutbound = true;
 
     if (stopId.startsWith('virtual:')) {
       const parts = stopId.split(':');
-      lat = Number(parts[1]);
-      lng = Number(parts[2]);
+      const pathType = parts[1];
+      lat = Number(parts[2]);
+      lng = Number(parts[3]);
+      stopIsOnOutbound = pathType === 'outbound';
     } else {
       // Fallback compatibility with physical stops
       const routeStop = await this.prisma.routeStop.findUnique({
@@ -80,13 +101,18 @@ export class PrismaEtaRepository implements IEtaRepository {
       lng = Number(routeStop.stop.longitude);
     }
 
+    const activePathSql = stopIsOnOutbound 
+      ? 'r."outboundPath"' 
+      : 'COALESCE(r."returnPath", r."outboundPath")';
+
     const query = `
       SELECT 
-        ST_Length(r."outboundPath"::geography) AS "totalLengthMeters",
+        ST_Length(r."outboundPath"::geography) AS "outboundLengthMeters",
+        ST_Length(COALESCE(r."returnPath", r."outboundPath")::geography) AS "returnLengthMeters",
         ST_LineLocatePoint(
-          r."outboundPath", 
+          ${activePathSql}, 
           ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
-        ) * ST_Length(r."outboundPath"::geography) AS "stopDistanceMeters"
+        ) * ST_Length(${activePathSql}::geography) AS "stopDistanceMeters"
       FROM "Route" r
       WHERE r.id = '${routeId}'::uuid
     `;
@@ -98,8 +124,10 @@ export class PrismaEtaRepository implements IEtaRepository {
 
     const row = result[0];
     return {
-      totalLengthMeters: Number(row.totalLengthMeters || 0),
+      outboundLengthMeters: Number(row.outboundLengthMeters || 0),
+      returnLengthMeters: Number(row.returnLengthMeters || 0),
       stopDistanceMeters: Number(row.stopDistanceMeters || 0),
+      stopIsOnOutbound,
     };
   }
 }

@@ -41,19 +41,47 @@ export class GetBusArrivalUseCase {
       throw new RouteOrStopNotFoundException();
     }
 
-    const { totalLengthMeters, stopDistanceMeters } = routeData;
+    const { 
+      outboundLengthMeters, 
+      returnLengthMeters, 
+      stopDistanceMeters, 
+      stopIsOnOutbound 
+    } = routeData;
 
     const progress = this.simulationService.getProgress(routeId);
 
-    const busDistanceMeters = totalLengthMeters * progress;
-    let distanceToStop = stopDistanceMeters - busDistanceMeters;
+    let distanceToStop = 0;
+    let busDistanceMeters = 0;
 
-    if (distanceToStop < 0) {
-      distanceToStop =
-        totalLengthMeters - busDistanceMeters + stopDistanceMeters;
+    if (progress <= 0.5) {
+      // El bus está en la ida (outbound)
+      const outboundProgress = progress * 2;
+      busDistanceMeters = outboundLengthMeters * outboundProgress;
+
+      if (stopIsOnOutbound) {
+        distanceToStop = stopDistanceMeters - busDistanceMeters;
+        if (distanceToStop < 0) {
+          distanceToStop = (outboundLengthMeters - busDistanceMeters) + returnLengthMeters + stopDistanceMeters;
+        }
+      } else {
+        distanceToStop = (outboundLengthMeters - busDistanceMeters) + stopDistanceMeters;
+      }
+    } else {
+      // El bus está en el retorno (return)
+      const returnProgress = (progress - 0.5) * 2;
+      busDistanceMeters = returnLengthMeters * returnProgress;
+
+      if (!stopIsOnOutbound) {
+        distanceToStop = stopDistanceMeters - busDistanceMeters;
+        if (distanceToStop < 0) {
+          distanceToStop = (returnLengthMeters - busDistanceMeters) + outboundLengthMeters + stopDistanceMeters;
+        }
+      } else {
+        distanceToStop = (returnLengthMeters - busDistanceMeters) + stopDistanceMeters;
+      }
     }
 
-    const busSpeedMps = 25 / 3.6; // 6.944 m/s
+    const busSpeedMps = 25 / 3.6; // 6.944 m/s (25 km/h)
     const etaSeconds = Math.round(distanceToStop / busSpeedMps);
 
     return new BusArrivalEtaEntity(

@@ -9,8 +9,10 @@ export interface NearestStopData {
 }
 
 export interface RouteStopPathData {
-  totalLengthMeters: number;
+  outboundLengthMeters: number;
+  returnLengthMeters: number;
   stopDistanceMeters: number;
+  stopIsOnOutbound: boolean;
 }
 
 export interface IEtaRepository {
