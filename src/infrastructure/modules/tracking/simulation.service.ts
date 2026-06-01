@@ -2,9 +2,12 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { TrackingGateway } from '../../../presentation/gateways/tracking.gateway';
 import { PrismaService } from '@shared/prisma/prisma.service';
+import type { ISimulationService } from '../../../domain/services/tracking/simulation.service';
 
 @Injectable()
-export class SimulationService implements OnModuleInit, OnModuleDestroy {
+export class SimulationService
+  implements OnModuleInit, OnModuleDestroy, ISimulationService
+{
   private interval: NodeJS.Timeout;
   private progressMap: Map<string, number> = new Map();
 
