@@ -16,21 +16,21 @@ export class PrismaEtaRepository implements IEtaRepository {
     lng: number,
     routeId?: string,
   ): Promise<NearestStopData | null> {
-    const routeFilter = routeId ? `AND rs."routeId" = '${routeId}'::uuid` : '';
+    const routeFilter = routeId ? `AND r.id = '${routeId}'::uuid` : '';
 
     const query = `
       SELECT 
-        s.id, 
-        s.name, 
-        s.latitude, 
-        s.longitude,
+        r.id AS "routeId",
+        r.code AS "routeCode",
+        r.name AS "routeName",
+        ST_Y(ST_ClosestPoint(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326))) AS latitude,
+        ST_X(ST_ClosestPoint(r."outboundPath", ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326))) AS longitude,
         ST_DistanceSphere(
-          ST_MakePoint(s.longitude, s.latitude),
-          ST_MakePoint(${lng}, ${lat})
+          r."outboundPath",
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
         ) AS "distanceMeters"
-      FROM "Stop" s
-      INNER JOIN "RouteStop" rs ON s.id = rs."stopId"
-      WHERE s."isActive" = true ${routeFilter}
+      FROM "Route" r
+      WHERE r."isActive" = true ${routeFilter}
       ORDER BY "distanceMeters" ASC
       LIMIT 1
     `;
@@ -41,12 +41,14 @@ export class PrismaEtaRepository implements IEtaRepository {
     }
 
     const row = result[0];
+    const virtualLat = Number(row.latitude);
+    const virtualLng = Number(row.longitude);
     return {
-      id: row.id,
-      name: row.name,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      distanceMeters: row.distanceMeters,
+      id: `virtual:${virtualLat}:${virtualLng}`,
+      name: `Intersección ${row.routeCode} (Punto Peatonal más cercano)`,
+      latitude: virtualLat,
+      longitude: virtualLng,
+      distanceMeters: Number(row.distanceMeters),
     };
   }
 
@@ -54,24 +56,50 @@ export class PrismaEtaRepository implements IEtaRepository {
     routeId: string,
     stopId: string,
   ): Promise<RouteStopPathData | null> {
-    const routeStop = await this.prisma.routeStop.findUnique({
-      where: {
-        routeId_stopId: { routeId, stopId },
-      },
-    });
+    let lat: number;
+    let lng: number;
 
-    if (!routeStop) {
+    if (stopId.startsWith('virtual:')) {
+      const parts = stopId.split(':');
+      lat = Number(parts[1]);
+      lng = Number(parts[2]);
+    } else {
+      // Fallback compatibility with physical stops
+      const routeStop = await this.prisma.routeStop.findUnique({
+        where: {
+          routeId_stopId: { routeId, stopId },
+        },
+        include: {
+          stop: true,
+        },
+      });
+      if (!routeStop || !routeStop.stop) {
+        return null;
+      }
+      lat = Number(routeStop.stop.latitude);
+      lng = Number(routeStop.stop.longitude);
+    }
+
+    const query = `
+      SELECT 
+        ST_Length(r."outboundPath"::geography) AS "totalLengthMeters",
+        ST_LineLocatePoint(
+          r."outboundPath", 
+          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
+        ) * ST_Length(r."outboundPath"::geography) AS "stopDistanceMeters"
+      FROM "Route" r
+      WHERE r.id = '${routeId}'::uuid
+    `;
+
+    const result = await this.prisma.$queryRawUnsafe<any[]>(query);
+    if (!result || result.length === 0) {
       return null;
     }
 
-    const lastStop = await this.prisma.routeStop.findFirst({
-      where: { routeId },
-      orderBy: { stopOrder: 'desc' },
-    });
-
+    const row = result[0];
     return {
-      totalLengthMeters: Number(lastStop?.distanceFromRouteStartMeters || 0),
-      stopDistanceMeters: Number(routeStop.distanceFromRouteStartMeters || 0),
+      totalLengthMeters: Number(row.totalLengthMeters || 0),
+      stopDistanceMeters: Number(row.stopDistanceMeters || 0),
     };
   }
 }
