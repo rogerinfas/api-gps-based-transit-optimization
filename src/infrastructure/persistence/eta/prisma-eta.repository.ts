@@ -58,18 +58,20 @@ export class PrismaEtaRepository implements IEtaRepository {
       where: {
         routeId_stopId: { routeId, stopId },
       },
-      include: {
-        route: true,
-      },
     });
 
-    if (!routeStop || !routeStop.route) {
+    if (!routeStop) {
       return null;
     }
 
+    const lastStop = await this.prisma.routeStop.findFirst({
+      where: { routeId },
+      orderBy: { stopOrder: 'desc' },
+    });
+
     return {
-      totalLengthMeters: Number(routeStop.route.totalLengthMeters),
-      stopDistanceMeters: Number(routeStop.distanceFromStart),
+      totalLengthMeters: Number(lastStop?.distanceFromRouteStartMeters || 0),
+      stopDistanceMeters: Number(routeStop.distanceFromRouteStartMeters || 0),
     };
   }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 import { ApiProperty } from '@nestjs/swagger';
-import { NearestStopEntity } from '../../../domain/entities/eta/nearest-stop.entity';
-import { BusArrivalEtaEntity } from '../../../domain/entities/eta/bus-arrival-eta.entity';
+import { NearestStopEntity } from '../../../../domain/entities/eta/nearest-stop.entity';
+import { BusArrivalEtaEntity } from '../../../../domain/entities/eta/bus-arrival-eta.entity';
 
 export class NearestStopResponse {
   @ApiProperty()
