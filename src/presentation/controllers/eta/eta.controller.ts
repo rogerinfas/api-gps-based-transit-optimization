@@ -44,7 +44,7 @@ export class EtaController {
   @ApiResponse({ type: BusArrivalEtaResponse })
   async getBusArrivalEta(
     @Query('routeId', ParseUUIDPipe) routeId: string,
-    @Query('stopId', ParseUUIDPipe) stopId: string,
+    @Query('stopId') stopId: string,
   ): Promise<BusArrivalEtaResponse> {
     const result = await this.getBusArrivalUseCase.execute(routeId, stopId);
     return BusArrivalEtaResponse.fromEntity(result);
