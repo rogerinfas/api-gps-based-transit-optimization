@@ -6,6 +6,7 @@ export type RouteRow = {
   name: string;
   description: string | null;
   imageUrl: string | null;
+  color: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -51,6 +52,7 @@ export class PrismaRouteMapper {
       name: row.name,
       description: row.description,
       imageUrl: row.imageUrl,
+      color: row.color,
       isActive: row.isActive,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
