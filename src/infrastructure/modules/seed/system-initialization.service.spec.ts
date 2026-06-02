@@ -2,9 +2,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SystemInitializationService } from './system-initialization.service';
 import { PrismaService } from '@shared/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
-jest.mock('bcrypt');
+jest.mock('bcryptjs');
 
 describe('SystemInitializationService', () => {
   let service: SystemInitializationService;
