@@ -7,6 +7,7 @@ export interface CreateRouteData {
   name: string;
   description?: string | null;
   imageUrl?: string | null;
+  color?: string;
   isActive?: boolean;
 }
 
@@ -15,6 +16,7 @@ export interface UpdateRouteData {
   name?: string;
   description?: string | null;
   imageUrl?: string | null;
+  color?: string;
   isActive?: boolean;
   outboundPathGeoJson?: any;
   returnPathGeoJson?: any;
