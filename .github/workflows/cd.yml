@@ -115,6 +115,9 @@ jobs:
             docker stop transit-api transit-postgres || true
             docker rm transit-api transit-postgres || true
 
+            # Limpiar imágenes y cachés de Docker huérfanas para liberar espacio en el disco del VPS
+            docker system prune -f
+
             echo "${REGISTRY_TOKEN}" | docker login -u "${REGISTRY_USERNAME}" --password-stdin
             docker compose -p transit-backend -f docker/docker-compose.prod.yml pull api
             docker compose -p transit-backend -f docker/docker-compose.prod.yml up -d postgres
