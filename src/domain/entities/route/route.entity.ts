@@ -3,10 +3,13 @@ export interface RouteProps {
   code: string;
   name: string;
   description: string | null;
+  imageUrl: string | null;
+  color: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  path?: [number, number][];
+  outboundPath?: [number, number][]; // [lon, lat][]
+  returnPath?: [number, number][]; // [lon, lat][]
 }
 
 export class Route {
@@ -32,6 +35,14 @@ export class Route {
     return this.props.description;
   }
 
+  get imageUrl(): string | null {
+    return this.props.imageUrl;
+  }
+
+  get color(): string {
+    return this.props.color;
+  }
+
   get isActive(): boolean {
     return this.props.isActive;
   }
@@ -44,8 +55,12 @@ export class Route {
     return this.props.updatedAt;
   }
 
-  get path(): [number, number][] | undefined {
-    return this.props.path;
+  get outboundPath(): [number, number][] | undefined {
+    return this.props.outboundPath;
+  }
+
+  get returnPath(): [number, number][] | undefined {
+    return this.props.returnPath;
   }
 
   toProps(): RouteProps {

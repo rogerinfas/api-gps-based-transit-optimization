@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, VehicleStatus } from '@prisma/client';
 import { Pool } from 'pg';
+import * as bcrypt from 'bcryptjs';
 
 const connectionString = process.env.DATABASE_URL as string;
 const pool = new Pool({ connectionString });
@@ -16,8 +17,24 @@ async function main() {
   await prisma.stop.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.route.deleteMany();
+  // No borramos User en seed a menos que sea necesario, o usamos upsert para el admin
 
-  // 1. Crear Ruta T1
+  // 1. Crear Usuario Admin por defecto
+  const adminPassword = process.env.ADMIN_PASSWORD || 'User123!';
+  const adminEmail = process.env.ADMIN_EMAIL || 'user@gps-transit.com';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: { password: hashedPassword },
+    create: {
+      email: adminEmail,
+      name: 'Admin User',
+      password: hashedPassword,
+    },
+  });
+
+  // 2. Crear Ruta T1
   const routeT1 = await prisma.route.upsert({
     where: { code: 'SIT-T1' },
     update: {},
@@ -52,7 +69,7 @@ async function main() {
   ].join(',') + ')';
 
   await prisma.$executeRawUnsafe(
-    `UPDATE "Route" SET path = ST_GeomFromText($1, 4326) WHERE id = $2`,
+    `UPDATE "Route" SET "outboundPath" = ST_GeomFromText($1, 4326) WHERE id = $2::uuid`,
     pathWkt,
     routeT1.id
   );
@@ -81,7 +98,7 @@ async function main() {
 
     // Actualizar ubicación PostGIS
     await prisma.$executeRawUnsafe(
-      `UPDATE "Stop" SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3`,
+      `UPDATE "Stop" SET location = ST_SetSRID(ST_MakePoint($1, $2), 4326) WHERE id = $3::uuid`,
       s.lon,
       s.lat,
       stop.id

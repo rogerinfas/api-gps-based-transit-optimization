@@ -10,8 +10,8 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "start:dev": "nest start api-gps-based-transit-optimization --watch",
+    "start:debug": "nest start api-gps-based-transit-optimization --debug --watch",
     "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
@@ -28,21 +28,32 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1055.0",
+    "@aws-sdk/s3-request-presigner": "^3.1055.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.2",
     "@nestjs/mapped-types": "^2.1.1",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.24",
     "@nestjs/swagger": "^11.4.1",
+    "@nestjs/websockets": "^11.1.24",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@scalar/nestjs-api-reference": "^1.1.10",
+    "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "dotenv": "^17.4.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "pg": "^8.20.0",
     "prisma": "^7.7.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -50,11 +61,15 @@
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/multer": "^2.1.0",
     "@types/node": "^22.10.7",
+    "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.20.0",
     "@types/supertest": "^6.0.2",
+    "@types/uuid": "^11.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -92,13 +107,18 @@
       "^@dtos/(.*)$": "<rootDir>/presentation/dtos/$1",
       "^@presentation/(.*)$": "<rootDir>/presentation/$1",
       "^@shared/(.*)$": "<rootDir>/shared/$1",
-      "^.*generated/prisma/client$": "<rootDir>/test/prisma-client.mock.ts"
+      "^@storage/(.*)$": "<rootDir>/../libs/storage/src/$1",
+      "^uuid$": "<rootDir>/../test/uuid.mock.ts",
+      "^.*generated/prisma/client$": "<rootDir>/../test/prisma-client.mock.ts"
     },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
+    ],
+    "setupFiles": [
+      "dotenv/config"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

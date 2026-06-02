@@ -6,7 +6,7 @@ export const VEHICLE_REPOSITORY = Symbol('VEHICLE_REPOSITORY');
 export interface CreateVehicleData {
   code: string;
   plateNumber?: string | null;
-  status: VehicleStatus;
+  status?: VehicleStatus;
   capacity?: number | null;
   routeId?: string | null;
 }

@@ -9,7 +9,13 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -20,6 +26,8 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { CreateRouteUseCase } from '@use-cases/route/create-route.use-case';
 import { DeleteRouteUseCase } from '@use-cases/route/delete-route.use-case';
@@ -27,6 +35,7 @@ import { FindAllRoutesUseCase } from '@use-cases/route/find-all-routes.use-case'
 import { FindRouteByIdUseCase } from '@use-cases/route/find-route-by-id.use-case';
 import { UpdateRouteUseCase } from '@use-cases/route/update-route.use-case';
 import { GetRouteSimulationUseCase } from '@use-cases/route/get-route-simulation.use-case';
+import { UploadRouteImageUseCase } from '@use-cases/route/upload-route-image.use-case';
 import { CreateRouteDto } from '@dtos/route/create-route.dto';
 import { UpdateRouteDto } from '@dtos/route/update-route.dto';
 import { RouteResponseDto } from '@dtos/route/route-response.dto';
@@ -41,8 +50,8 @@ export class RouteController {
     private readonly updateRouteUseCase: UpdateRouteUseCase,
     private readonly deleteRouteUseCase: DeleteRouteUseCase,
     private readonly getRouteSimulationUseCase: GetRouteSimulationUseCase,
+    private readonly uploadRouteImageUseCase: UploadRouteImageUseCase,
   ) {}
-
   @Post()
   @ApiOperation({ summary: 'Crear una ruta' })
   @ApiCreatedResponse({ type: RouteResponseDto })
@@ -50,12 +59,7 @@ export class RouteController {
   async create(
     @Body() createRouteDto: CreateRouteDto,
   ): Promise<RouteResponseDto> {
-    const route = await this.createRouteUseCase.execute({
-      code: createRouteDto.code,
-      name: createRouteDto.name,
-      description: createRouteDto.description ?? null,
-      isActive: createRouteDto.isActive ?? true,
-    });
+    const route = await this.createRouteUseCase.execute(createRouteDto);
     return RouteResponseDto.fromDomain(route);
   }
 
@@ -87,16 +91,50 @@ export class RouteController {
     @Param('id') id: string,
     @Body() updateRouteDto: UpdateRouteDto,
   ): Promise<RouteResponseDto> {
-    const route = await this.updateRouteUseCase.execute(id, {
-      ...(updateRouteDto.code !== undefined && { code: updateRouteDto.code }),
-      ...(updateRouteDto.name !== undefined && { name: updateRouteDto.name }),
-      ...(updateRouteDto.description !== undefined && {
-        description: updateRouteDto.description,
+    const route = await this.updateRouteUseCase.execute(id, updateRouteDto);
+    return RouteResponseDto.fromDomain(route);
+  }
+
+  @Post(':id/image')
+  @ApiOperation({ summary: 'Subir o reemplazar la imagen de una ruta' })
+  @ApiParam({ name: 'id', description: 'Identificador de la ruta' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({ type: RouteResponseDto })
+  @ApiNotFoundResponse({ description: 'Ruta no encontrada' })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @Param('id') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+        ],
       }),
-      ...(updateRouteDto.isActive !== undefined && {
-        isActive: updateRouteDto.isActive,
-      }),
+    )
+    file: Express.Multer.File,
+  ): Promise<RouteResponseDto> {
+    const route = await this.uploadRouteImageUseCase.execute({
+      routeId: id,
+      file: {
+        buffer: file.buffer,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+      },
     });
+
     return RouteResponseDto.fromDomain(route);
   }
 

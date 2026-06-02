@@ -330,6 +330,216 @@
           "Routes"
         ]
       }
+    },
+    "/routes/{id}/image": {
+      "post": {
+        "operationId": "RouteController_uploadImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ruta no encontrada"
+          }
+        },
+        "summary": "Subir o reemplazar la imagen de una ruta",
+        "tags": [
+          "Routes"
+        ]
+      }
+    },
+    "/routes/{id}/simulate": {
+      "get": {
+        "operationId": "RouteController_simulate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Identificador de la ruta",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "progress",
+            "required": true,
+            "in": "query",
+            "description": "Progreso de la ruta (0.0 a 1.0)",
+            "schema": {
+              "example": 0.5,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Punto interpolado [lon, lat]",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Obtener un punto interpolado para simulación",
+        "tags": [
+          "Routes"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return JWT token"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "User login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/eta/nearest-stop": {
+      "get": {
+        "operationId": "EtaController_getNearestStop",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "routeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NearestStopResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Obtener el paradero más cercano y tiempo de caminata estimado",
+        "tags": [
+          "ETA"
+        ]
+      }
+    },
+    "/eta/bus-arrival": {
+      "get": {
+        "operationId": "EtaController_getBusArrivalEta",
+        "parameters": [
+          {
+            "name": "routeId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stopId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusArrivalEtaResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Obtener tiempo estimado de arribo (ETA) del bus al paradero",
+        "tags": [
+          "ETA"
+        ]
+      }
     }
   },
   "info": {
@@ -378,9 +588,8 @@
           },
           "routeId": {
             "type": "object",
-            "description": "Identificador de la ruta asignada",
-            "example": "ckxyz123",
-            "maxLength": 64,
+            "description": "Identificador (UUID) de la ruta asignada",
+            "example": "11111111-2222-3333-4444-555555555555",
             "nullable": true
           }
         },
@@ -487,9 +696,8 @@
           },
           "routeId": {
             "type": "object",
-            "description": "Identificador de la ruta asignada",
-            "example": "ckxyz123",
-            "maxLength": 64,
+            "description": "Identificador (UUID) de la ruta asignada",
+            "example": "11111111-2222-3333-4444-555555555555",
             "nullable": true
           }
         }
@@ -512,11 +720,21 @@
             "maxLength": 120
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Descripción opcional para operaciones",
             "example": "Ruta urbana Characato - Linea A",
             "maxLength": 255,
             "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL de la imagen del bus/ruta",
+            "example": "https://ejemplo.com/bus.jpg"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color hexadecimal de la ruta",
+            "example": "#3b82f6"
           },
           "isActive": {
             "type": "boolean",
@@ -553,10 +771,21 @@
             "example": "Ruta urbana Characato - Linea A",
             "nullable": true
           },
+          "imageUrl": {
+            "type": "object",
+            "description": "URL de la imagen de la ruta",
+            "example": "https://ejemplo.com/bus.jpg",
+            "nullable": true
+          },
           "isActive": {
             "type": "boolean",
             "description": "Indica si la ruta está operativa",
             "example": true
+          },
+          "color": {
+            "type": "string",
+            "description": "Color hexadecimal de la ruta",
+            "example": "#3b82f6"
           },
           "createdAt": {
             "type": "string",
@@ -567,6 +796,46 @@
             "type": "string",
             "description": "Fecha de última actualización en ISO 8601",
             "example": "2026-04-28T15:00:00.000Z"
+          },
+          "outboundPath": {
+            "type": "array",
+            "description": "Geometría de la ruta de Ida en formato de coordenadas [[lon, lat], ...]",
+            "example": [
+              [
+                -71.4883,
+                -16.4716
+              ],
+              [
+                -71.531,
+                -16.406
+              ]
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "returnPath": {
+            "type": "array",
+            "description": "Geometría de la ruta de Regreso en formato de coordenadas [[lon, lat], ...]",
+            "example": [
+              [
+                -71.531,
+                -16.406
+              ],
+              [
+                -71.4883,
+                -16.4716
+              ]
+            ],
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
           }
         },
         "required": [
@@ -574,7 +843,9 @@
           "code",
           "name",
           "description",
+          "imageUrl",
           "isActive",
+          "color",
           "createdAt",
           "updatedAt"
         ]
@@ -597,18 +868,171 @@
             "maxLength": 120
           },
           "description": {
-            "type": "object",
+            "type": "string",
             "description": "Descripción opcional para operaciones",
             "example": "Ruta urbana Characato - Linea A",
             "maxLength": 255,
             "nullable": true
           },
+          "imageUrl": {
+            "type": "string",
+            "description": "URL de la imagen del bus/ruta",
+            "example": "https://ejemplo.com/bus.jpg"
+          },
+          "color": {
+            "type": "string",
+            "description": "Color hexadecimal de la ruta",
+            "example": "#3b82f6"
+          },
           "isActive": {
             "type": "boolean",
             "description": "Indica si la ruta está operativa",
             "example": true
+          },
+          "outboundPathGeoJson": {
+            "type": "object",
+            "description": "Geometría LineString (GeoJSON) para la ruta de Ida",
+            "example": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -71.53,
+                  -16.4
+                ],
+                [
+                  -71.54,
+                  -16.41
+                ]
+              ]
+            }
+          },
+          "returnPathGeoJson": {
+            "type": "object",
+            "description": "Geometría LineString (GeoJSON) para la ruta de Regreso",
+            "example": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -71.54,
+                  -16.41
+                ],
+                [
+                  -71.53,
+                  -16.4
+                ]
+              ]
+            }
           }
         }
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@gps-transit.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "User123!"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "NearestStopResponse": {
+        "type": "object",
+        "properties": {
+          "stopId": {
+            "type": "string",
+            "description": "Identificador único de la parada física o el ID virtual generado para el punto peatonal",
+            "example": "virtual:outbound:-16.456785:-71.494358"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre descriptivo de la parada o punto de intersección peatonal",
+            "example": "Intersección SIT-T1 (Punto Peatonal más cercano)"
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Latitud geográfica de la parada o punto peatonal",
+            "example": -16.456785
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitud geográfica de la parada o punto peatonal",
+            "example": -71.494358
+          },
+          "distanceMeters": {
+            "type": "number",
+            "description": "Distancia real calculada a pie hasta la parada (incluye factor de desvío peatonal)",
+            "example": 120
+          },
+          "etaSeconds": {
+            "type": "number",
+            "description": "Tiempo estimado de llegada (ETA) en segundos caminando hacia el punto peatonal",
+            "example": 100
+          }
+        },
+        "required": [
+          "stopId",
+          "name",
+          "latitude",
+          "longitude",
+          "distanceMeters",
+          "etaSeconds"
+        ]
+      },
+      "BusArrivalEtaResponse": {
+        "type": "object",
+        "properties": {
+          "routeId": {
+            "type": "string",
+            "description": "Identificador único de la ruta del autobús",
+            "example": "d4da01fd-ffc9-b805-67bf-5fa834bde675"
+          },
+          "stopId": {
+            "type": "string",
+            "description": "Identificador único de la parada de destino",
+            "example": "virtual:outbound:-16.450655:-71.496045"
+          },
+          "progress": {
+            "type": "number",
+            "description": "Progreso actual del autobús a lo largo de la ruta (0.0 a 1.0 representando el viaje completo)",
+            "example": 0.35
+          },
+          "busDistanceMeters": {
+            "type": "number",
+            "description": "Distancia recorrida por el autobús en metros a lo largo de su tramo actual",
+            "example": 2450
+          },
+          "stopDistanceMeters": {
+            "type": "number",
+            "description": "Distancia total acumulada desde el inicio de la ruta hasta la parada destino en metros",
+            "example": 4100
+          },
+          "distanceToStopMeters": {
+            "type": "number",
+            "description": "Distancia restante que le falta al autobús para llegar a la parada en metros",
+            "example": 1650
+          },
+          "etaSeconds": {
+            "type": "number",
+            "description": "Tiempo estimado de llegada (ETA) del autobús a la parada en segundos",
+            "example": 238
+          }
+        },
+        "required": [
+          "routeId",
+          "stopId",
+          "progress",
+          "busDistanceMeters",
+          "stopDistanceMeters",
+          "distanceToStopMeters",
+          "etaSeconds"
+        ]
       }
     }
   }

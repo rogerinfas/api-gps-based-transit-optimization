@@ -114,3 +114,47 @@ Secrets requeridos en GitHub Actions:
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
+
+## 🧪 Pruebas y Cobertura (Testing)
+El backend cuenta con una sólida base de pruebas unitarias implementadas con Jest, garantizando el correcto funcionamiento de las capas de Aplicación, Infraestructura (incluyendo base de datos y WebSockets) y Autenticación.
+
+### 📊 Estado Actual de Cobertura
+Las pruebas abarcan las funcionalidades clave del sistema, alcanzando los siguientes niveles de cobertura (Coverage):
+- **Statements:** ~86.32%
+- **Branches:** ~68.91%
+- **Functions:** ~83.92%
+- **Lines:** ~85.15%
+
+**Total:** 61 tests exitosos distribuidos en 14 suites. No hay fallos (0 failed tests).
+
+### 🗂️ Componentes Probados
+1. **Casos de Uso (Application):**
+   - Rutas (`route.service.spec.ts`): Creación, listado, obtención, actualización, eliminación y simulación de progreso de rutas (100% de cobertura de lógica).
+2. **Persistencia (Infrastructure):**
+   - `prisma-route.repository.spec.ts`: Operaciones de BD incluyendo consultas complejas y ejecución de sentencias geográficas de PostGIS (`ST_GeomFromGeoJSON`, `ST_LineInterpolatePoint`).
+   - `prisma-route.mapper.spec.ts`: Transformaciones bidireccionales entre Modelos de Dominio, Objetos DTO y formato GeoJSON.
+3. **Módulo de Autenticación:**
+   - `auth.service.spec.ts`: Lógica de validación de credenciales (usando `bcrypt`) y emisión de tokens (`JwtService`).
+   - `jwt.strategy.spec.ts`: Verificación de tokens y extracción de sesión de usuario en las peticiones HTTP.
+4. **Módulo Tracking (WebSockets & Simulación):**
+   - `tracking.gateway.spec.ts`: Manejo de conexiones de sockets, uniones a salas (rooms) mediante `socket.io` e interacciones en tiempo real.
+   - `simulation.service.spec.ts`: Gestión del bucle de simulación mediante temporizadores (`setInterval`, `clearInterval`) y publicación de eventos.
+5. **Módulo Seed (Inicialización):**
+   - `system-initialization.service.spec.ts`: Verificación de inyección segura del superusuario administrador vía variables de entorno al levantar el servidor.
+
+### 🚀 Cómo Ejecutar las Pruebas
+
+Ejecutar todos los tests unitarios:
+```bash
+npm run test
+```
+
+Ejecutar los tests y generar el reporte de cobertura (Coverage Report):
+```bash
+npm run test:cov
+```
+
+Ejecutar los tests en modo de observación (Watch mode), ideal para desarrollo:
+```bash
+npm run test:watch
+```

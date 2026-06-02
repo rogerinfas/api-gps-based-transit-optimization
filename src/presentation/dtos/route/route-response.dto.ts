@@ -28,10 +28,23 @@ export class RouteResponseDto {
   description!: string | null;
 
   @ApiProperty({
+    description: 'URL de la imagen de la ruta',
+    example: 'https://ejemplo.com/bus.jpg',
+    nullable: true,
+  })
+  imageUrl!: string | null;
+
+  @ApiProperty({
     description: 'Indica si la ruta está operativa',
     example: true,
   })
   isActive!: boolean;
+
+  @ApiProperty({
+    description: 'Color hexadecimal de la ruta',
+    example: '#3b82f6',
+  })
+  color!: string;
 
   @ApiProperty({
     description: 'Fecha de creación en ISO 8601',
@@ -47,7 +60,7 @@ export class RouteResponseDto {
 
   @ApiProperty({
     description:
-      'Geometría de la ruta en formato de coordenadas [[lon, lat], ...]',
+      'Geometría de la ruta de Ida en formato de coordenadas [[lon, lat], ...]',
     example: [
       [-71.4883, -16.4716],
       [-71.531, -16.406],
@@ -56,7 +69,20 @@ export class RouteResponseDto {
     items: { type: 'array', items: { type: 'number' } },
     required: false,
   })
-  path?: [number, number][];
+  outboundPath?: [number, number][];
+
+  @ApiProperty({
+    description:
+      'Geometría de la ruta de Regreso en formato de coordenadas [[lon, lat], ...]',
+    example: [
+      [-71.531, -16.406],
+      [-71.4883, -16.4716],
+    ],
+    type: 'array',
+    items: { type: 'array', items: { type: 'number' } },
+    required: false,
+  })
+  returnPath?: [number, number][];
 
   static fromDomain(route: Route): RouteResponseDto {
     const dto = new RouteResponseDto();
@@ -64,10 +90,13 @@ export class RouteResponseDto {
     dto.code = route.code;
     dto.name = route.name;
     dto.description = route.description;
+    dto.imageUrl = route.imageUrl;
     dto.isActive = route.isActive;
+    dto.color = route.color;
     dto.createdAt = route.createdAt.toISOString();
     dto.updatedAt = route.updatedAt.toISOString();
-    dto.path = route.path;
+    dto.outboundPath = route.outboundPath;
+    dto.returnPath = route.returnPath;
     return dto;
   }
 }

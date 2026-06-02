@@ -29,6 +29,8 @@ export class PrismaRouteRepository implements IRouteRepository {
           code: data.code,
           name: data.name,
           description: data.description ?? null,
+          imageUrl: data.imageUrl ?? null,
+          color: data.color,
           isActive: data.isActive ?? true,
         },
       });
@@ -45,8 +47,9 @@ export class PrismaRouteRepository implements IRouteRepository {
 
   async findAll(): Promise<Route[]> {
     const rows: RouteRow[] = await this.prisma.$queryRaw`
-      SELECT id, code, name, description, "isActive", "createdAt", "updatedAt",
-             ST_AsGeoJSON(path) as path
+      SELECT id, code, name, description, color, "imageUrl", "isActive", "createdAt", "updatedAt",
+             ST_AsGeoJSON("outboundPath") as "outboundPath",
+             ST_AsGeoJSON("returnPath") as "returnPath"
       FROM "Route"
       ORDER BY "createdAt" DESC
     `;
@@ -55,8 +58,9 @@ export class PrismaRouteRepository implements IRouteRepository {
 
   async findById(id: string): Promise<Route | null> {
     const rows: RouteRow[] = await this.prisma.$queryRaw`
-      SELECT id, code, name, description, "isActive", "createdAt", "updatedAt",
-             ST_AsGeoJSON(path) as path
+      SELECT id, code, name, description, color, "imageUrl", "isActive", "createdAt", "updatedAt",
+             ST_AsGeoJSON("outboundPath") as "outboundPath",
+             ST_AsGeoJSON("returnPath") as "returnPath"
       FROM "Route"
       WHERE id = ${id}
     `;
@@ -74,9 +78,28 @@ export class PrismaRouteRepository implements IRouteRepository {
           ...(data.description !== undefined && {
             description: data.description,
           }),
+          ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+          ...(data.color !== undefined && { color: data.color }),
           ...(data.isActive !== undefined && { isActive: data.isActive }),
         },
       });
+
+      if (data.outboundPathGeoJson) {
+        await this.prisma.$executeRaw`
+          UPDATE "Route"
+          SET "outboundPath" = ST_GeomFromGeoJSON(${JSON.stringify(data.outboundPathGeoJson)})
+          WHERE id = ${id}
+        `;
+      }
+
+      if (data.returnPathGeoJson) {
+        await this.prisma.$executeRaw`
+          UPDATE "Route"
+          SET "returnPath" = ST_GeomFromGeoJSON(${JSON.stringify(data.returnPathGeoJson)})
+          WHERE id = ${id}
+        `;
+      }
+
       return PrismaRouteMapper.toDomain(row);
     } catch (error: unknown) {
       if (this.isPrismaError(error) && error.code === uniqueViolation) {
@@ -107,9 +130,9 @@ export class PrismaRouteRepository implements IRouteRepository {
     progress: number,
   ): Promise<[number, number] | null> {
     const rows: Array<{ point: string }> = await this.prisma.$queryRaw`
-      SELECT ST_AsGeoJSON(ST_LineInterpolatePoint(path, ${progress})) as point
+      SELECT ST_AsGeoJSON(ST_LineInterpolatePoint("outboundPath", ${progress})) as point
       FROM "Route"
-      WHERE id = ${id} AND path IS NOT NULL
+      WHERE id = ${id} AND "outboundPath" IS NOT NULL
     `;
 
     const row = rows[0];
