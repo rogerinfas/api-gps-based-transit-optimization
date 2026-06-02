@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, VehicleStatus } from '@prisma/client';
 import { Pool } from 'pg';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 const connectionString = process.env.DATABASE_URL as string;
 const pool = new Pool({ connectionString });
