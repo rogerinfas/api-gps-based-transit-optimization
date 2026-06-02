@@ -33,7 +33,7 @@ export class GetBusArrivalUseCase {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
         routeId,
       );
-      
+
     // 2. Validar formato para la parada (física UUID o virtual)
     const isValidStopUuid =
       stopId &&
@@ -79,7 +79,7 @@ export class GetBusArrivalUseCase {
       if (stopIsOnOutbound) {
         // Autobús y parada están en el trayecto de ida
         distanceToStop = stopDistanceMeters - busDistanceMeters;
-        
+
         // Si el autobús ya pasó la parada de ida, debe terminar la ida, hacer la vuelta y volver a pasarla
         if (distanceToStop < 0) {
           distanceToStop =
@@ -102,7 +102,7 @@ export class GetBusArrivalUseCase {
       if (!stopIsOnOutbound) {
         // Autobús y parada están en el trayecto de retorno
         distanceToStop = stopDistanceMeters - busDistanceMeters;
-        
+
         // Si el autobús ya pasó la parada de retorno, debe terminar el retorno, hacer la ida y volver a pasarla
         if (distanceToStop < 0) {
           distanceToStop =

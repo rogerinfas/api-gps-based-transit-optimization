@@ -8,13 +8,15 @@ import { BusArrivalEtaEntity } from '../../../../domain/entities/eta/bus-arrival
  */
 export class NearestStopResponse {
   @ApiProperty({
-    description: 'Identificador único de la parada física o el ID virtual generado para el punto peatonal',
+    description:
+      'Identificador único de la parada física o el ID virtual generado para el punto peatonal',
     example: 'virtual:outbound:-16.456785:-71.494358',
   })
   stopId: string;
 
   @ApiProperty({
-    description: 'Nombre descriptivo de la parada o punto de intersección peatonal',
+    description:
+      'Nombre descriptivo de la parada o punto de intersección peatonal',
     example: 'Intersección SIT-T1 (Punto Peatonal más cercano)',
   })
   name: string;
@@ -32,13 +34,15 @@ export class NearestStopResponse {
   longitude: number;
 
   @ApiProperty({
-    description: 'Distancia real calculada a pie hasta la parada (incluye factor de desvío peatonal)',
+    description:
+      'Distancia real calculada a pie hasta la parada (incluye factor de desvío peatonal)',
     example: 120,
   })
   distanceMeters: number;
 
   @ApiProperty({
-    description: 'Tiempo estimado de llegada (ETA) en segundos caminando hacia el punto peatonal',
+    description:
+      'Tiempo estimado de llegada (ETA) en segundos caminando hacia el punto peatonal',
     example: 100,
   })
   etaSeconds: number;
@@ -77,31 +81,36 @@ export class BusArrivalEtaResponse {
   stopId: string;
 
   @ApiProperty({
-    description: 'Progreso actual del autobús a lo largo de la ruta (0.0 a 1.0 representando el viaje completo)',
+    description:
+      'Progreso actual del autobús a lo largo de la ruta (0.0 a 1.0 representando el viaje completo)',
     example: 0.35,
   })
   progress: number;
 
   @ApiProperty({
-    description: 'Distancia recorrida por el autobús en metros a lo largo de su tramo actual',
+    description:
+      'Distancia recorrida por el autobús en metros a lo largo de su tramo actual',
     example: 2450,
   })
   busDistanceMeters: number;
 
   @ApiProperty({
-    description: 'Distancia total acumulada desde el inicio de la ruta hasta la parada destino en metros',
+    description:
+      'Distancia total acumulada desde el inicio de la ruta hasta la parada destino en metros',
     example: 4100,
   })
   stopDistanceMeters: number;
 
   @ApiProperty({
-    description: 'Distancia restante que le falta al autobús para llegar a la parada en metros',
+    description:
+      'Distancia restante que le falta al autobús para llegar a la parada en metros',
     example: 1650,
   })
   distanceToStopMeters: number;
 
   @ApiProperty({
-    description: 'Tiempo estimado de llegada (ETA) del autobús a la parada en segundos',
+    description:
+      'Tiempo estimado de llegada (ETA) del autobús a la parada en segundos',
     example: 238,
   })
   etaSeconds: number;

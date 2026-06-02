@@ -18,7 +18,7 @@ export class PrismaEtaRepository implements IEtaRepository {
   /**
    * Obtiene la proyección/parada peatonal virtual más cercana a una coordenada GPS.
    * Proyecta el punto del usuario sobre la ruta de autobús más cercana utilizando funciones PostGIS.
-   * 
+   *
    * @param lat Latitud GPS del usuario peatón
    * @param lng Longitud GPS del usuario peatón
    * @param routeId (Opcional) Limitar la búsqueda de la proyección a una única ruta específica
@@ -78,7 +78,7 @@ export class PrismaEtaRepository implements IEtaRepository {
     const virtualLat = Number(row.latitude);
     const virtualLng = Number(row.longitude);
     const pathType = row.closestPathType;
-    
+
     // Retornar la parada virtual en formato compatible
     return {
       id: `virtual:${pathType}:${virtualLat}:${virtualLng}`,
@@ -92,7 +92,7 @@ export class PrismaEtaRepository implements IEtaRepository {
   /**
    * Obtiene la longitud total de los tramos de ida (outbound) y vuelta (return) de una ruta,
    * así como la distancia lineal acumulada en metros hasta una parada dada.
-   * 
+   *
    * @param routeId Identificador único de la ruta
    * @param stopId Identificador de la parada física o virtual
    */
