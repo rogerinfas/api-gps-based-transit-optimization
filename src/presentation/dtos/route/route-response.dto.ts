@@ -41,6 +41,12 @@ export class RouteResponseDto {
   isActive!: boolean;
 
   @ApiProperty({
+    description: 'Color hexadecimal de la ruta',
+    example: '#3b82f6',
+  })
+  color!: string;
+
+  @ApiProperty({
     description: 'Fecha de creación en ISO 8601',
     example: '2026-04-28T15:00:00.000Z',
   })
@@ -86,6 +92,7 @@ export class RouteResponseDto {
     dto.description = route.description;
     dto.imageUrl = route.imageUrl;
     dto.isActive = route.isActive;
+    dto.color = route.color;
     dto.createdAt = route.createdAt.toISOString();
     dto.updatedAt = route.updatedAt.toISOString();
     dto.outboundPath = route.outboundPath;

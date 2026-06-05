@@ -30,6 +30,7 @@ export class PrismaRouteRepository implements IRouteRepository {
           name: data.name,
           description: data.description ?? null,
           imageUrl: data.imageUrl ?? null,
+          color: data.color,
           isActive: data.isActive ?? true,
         },
       });
@@ -46,7 +47,7 @@ export class PrismaRouteRepository implements IRouteRepository {
 
   async findAll(): Promise<Route[]> {
     const rows: RouteRow[] = await this.prisma.$queryRaw`
-      SELECT id, code, name, description, "imageUrl", "isActive", "createdAt", "updatedAt",
+      SELECT id, code, name, description, color, "imageUrl", "isActive", "createdAt", "updatedAt",
              ST_AsGeoJSON("outboundPath") as "outboundPath",
              ST_AsGeoJSON("returnPath") as "returnPath"
       FROM "Route"
@@ -57,7 +58,7 @@ export class PrismaRouteRepository implements IRouteRepository {
 
   async findById(id: string): Promise<Route | null> {
     const rows: RouteRow[] = await this.prisma.$queryRaw`
-      SELECT id, code, name, description, "imageUrl", "isActive", "createdAt", "updatedAt",
+      SELECT id, code, name, description, color, "imageUrl", "isActive", "createdAt", "updatedAt",
              ST_AsGeoJSON("outboundPath") as "outboundPath",
              ST_AsGeoJSON("returnPath") as "returnPath"
       FROM "Route"
@@ -78,6 +79,7 @@ export class PrismaRouteRepository implements IRouteRepository {
             description: data.description,
           }),
           ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+          ...(data.color !== undefined && { color: data.color }),
           ...(data.isActive !== undefined && { isActive: data.isActive }),
         },
       });

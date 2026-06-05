@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsHexColor,
   IsOptional,
   IsString,
   MaxLength,
@@ -49,6 +50,15 @@ export class CreateRouteDto {
   @IsString()
   @IsOptional()
   imageUrl?: string;
+
+  @ApiPropertyOptional({
+    description: 'Color hexadecimal de la ruta',
+    example: '#3b82f6',
+  })
+  @IsString()
+  @IsOptional()
+  @IsHexColor({ message: 'El color debe ser un hexadecimal válido' })
+  color?: string;
 
   @ApiPropertyOptional({
     description: 'Indica si la ruta está operativa',

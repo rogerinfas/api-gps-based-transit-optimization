@@ -4,6 +4,7 @@ export interface RouteProps {
   name: string;
   description: string | null;
   imageUrl: string | null;
+  color: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +37,10 @@ export class Route {
 
   get imageUrl(): string | null {
     return this.props.imageUrl;
+  }
+
+  get color(): string {
+    return this.props.color;
   }
 
   get isActive(): boolean {
